@@ -69,7 +69,13 @@ class AwsSpanMetricsProcessor(SpanProcessor):
         attribute_dict: dict[str, BoundedAttributes] = self._generator.generate_metric_attributes_dict_from_span(
             span, self._resource
         )
-        map(lambda attributes: self._record_metrics(span, attributes), attribute_dict.values())
+        print("span-------------------------before")
+        print(span)
+        print("attribute_dict: " + str(attribute_dict) + "------------------")
+        [self._record_metrics(span, attributes) for attributes in attribute_dict.values()]
+        print(" map(lambda attributes: self._record_metrics(span, attributes): -----------------")
+        print("span-------------------------after")
+        print(span)
 
     @override
     def shutdown(self) -> None:
@@ -81,6 +87,7 @@ class AwsSpanMetricsProcessor(SpanProcessor):
         return True
 
     def _record_metrics(self, span: ReadableSpan, attributes: BoundedAttributes) -> None:
+        print("len(attributes): " + str(len(attributes)) + "------------------")
         # Only record metrics if non-empty attributes are returned.
         if len(attributes) > 0:
             self._record_error_or_fault(span, attributes)
@@ -94,6 +101,7 @@ class AwsSpanMetricsProcessor(SpanProcessor):
         status_code: StatusCode = span.status.status_code
 
         if http_status_code is None:
+            print("http_status_code: " + http_status_code + "------------------")
             http_status_code = attributes.get(_HTTP_STATUS_CODE)
 
         if _is_not_error_or_fault(http_status_code):

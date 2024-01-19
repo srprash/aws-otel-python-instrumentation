@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 from logging import Logger, getLogger
-from typing import Dict, Type
+from typing import Dict, Type, Union
 
 from typing_extensions import override
 
@@ -39,11 +39,12 @@ from opentelemetry.sdk.metrics._internal.instrument import (
 from opentelemetry.sdk.metrics.export import AggregationTemporality, PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, SpanExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SpanExporter, ConsoleSpanExporter
 from opentelemetry.sdk.trace.id_generator import IdGenerator
 from opentelemetry.sdk.trace.sampling import Sampler
 from opentelemetry.semconv.resource import ResourceAttributes
 from opentelemetry.trace import set_tracer_provider
+from amazon.opentelemetry.distro.console import ConsoleMetricExporter
 
 OTEL_SMP_ENABLED = "OTEL_SMP_ENABLED"
 OTEL_METRIC_EXPORT_INTERVAL = "OTEL_METRIC_EXPORT_INTERVAL"
@@ -96,7 +97,6 @@ def _initialize_components(auto_instrumentation_version):
         sampler=sampler,
         resource=resource,
     )
-    _init_metrics(metric_exporters, resource)
     logging_enabled = os.getenv(_OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED, "false")
     if logging_enabled.strip().lower() == "true":
         _init_logging(log_exporters, resource)
@@ -116,11 +116,14 @@ def _init_tracing(
         resource=resource,
     )
 
-    for _, exporter_class in exporters.items():
-        exporter_args: Dict[str, any] = {}
-        span_exporter: SpanExporter = exporter_class(**exporter_args)
-        span_exporter = _customize_exporter(span_exporter, resource)
-        trace_provider.add_span_processor(BatchSpanProcessor(span_exporter))
+    # for _, exporter_class in exporters.items():
+    #     exporter_args: Dict[str, any] = {}
+    #     span_exporter: SpanExporter = exporter_class(**exporter_args)
+    #     span_exporter = _customize_exporter(span_exporter, resource)
+    #     trace_provider.add_span_processor(BatchSpanProcessor(span_exporter))
+    span_exporter: SpanExporter = ConsoleSpanExporter()
+    span_exporter = _customize_exporter(span_exporter, resource)
+    trace_provider.add_span_processor(BatchSpanProcessor(span_exporter))
 
     _customize_span_processors(trace_provider, resource)
 
@@ -160,7 +163,9 @@ def _customize_span_processors(provider: TracerProvider, resource: Resource) -> 
         temporality_dict[typ] = AggregationTemporality.DELTA
     _logger.info("Span Metrics Processor enabled")
     smp_endpoint = os.environ.get(OTEL_AWS_SMP_EXPORTER_ENDPOINT, "http://cloudwatch-agent.amazon-cloudwatch:4317")
-    otel_metric_exporter = OTLPMetricExporter(endpoint=smp_endpoint, preferred_temporality=temporality_dict)
+    otel_metric_exporter = ConsoleMetricExporter(preferred_temporality=temporality_dict)
+    # otel_metric_exporter = ConsoleMetricExporter()
+    print("otel_metric_exporter: " + otel_metric_exporter.__class__.__name__ + "------------------")
     export_interval_millis = float(os.environ.get(OTEL_METRIC_EXPORT_INTERVAL, DEFAULT_METRIC_EXPORT_INTERVAL))
     _logger.debug("Span Metrics endpoint: %s", smp_endpoint)
     _logger.debug("Span Metrics export interval: %s", export_interval_millis)

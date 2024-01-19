@@ -11,9 +11,14 @@ app = Flask(__name__)
 
 @app.route("/server_request")
 def server_request():
+    print("HERE!!!!!!!!!!!!!!!")
     print(request.args.get("param"))
-    for bucket in s3.buckets.all():
-        print(bucket.name)
+    # for bucket in s3.buckets.all():
+    #     print(bucket.name)
+    bucket = s3.Bucket("no-bucket")
+    print(bucket.name)
+    for obj in bucket.objects.all():
+        print(obj.key)
     return "served"
 
 

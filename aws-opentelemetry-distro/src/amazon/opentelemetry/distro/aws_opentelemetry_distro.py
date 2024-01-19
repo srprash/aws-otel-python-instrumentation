@@ -5,7 +5,11 @@ from logging import getLogger
 
 from opentelemetry.distro import OpenTelemetryDistro
 from opentelemetry.environment_variables import OTEL_PROPAGATORS, OTEL_PYTHON_ID_GENERATOR
-from opentelemetry.sdk.environment_variables import OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION
+from opentelemetry.sdk.environment_variables import OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION ,OTEL_TRACES_SAMPLER
+from opentelemetry.environment_variables import (
+    OTEL_METRICS_EXPORTER,
+    OTEL_TRACES_EXPORTER,
+)
 
 logger = getLogger(__name__)
 
@@ -13,6 +17,9 @@ logger = getLogger(__name__)
 class AwsOpenTelemetryDistro(OpenTelemetryDistro):
     def _configure(self, **kwargs):
         super(AwsOpenTelemetryDistro, self)._configure()
+        os.environ.setdefault(OTEL_TRACES_SAMPLER, "parentbased_always_on")
+        os.environ.setdefault(OTEL_TRACES_EXPORTER, "console")
+        os.environ.setdefault(OTEL_METRICS_EXPORTER, "console")
         os.environ.setdefault(
             OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION, "base2_exponential_bucket_histogram"
         )
