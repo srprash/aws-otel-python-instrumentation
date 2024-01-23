@@ -84,11 +84,7 @@ def _initialize_components(auto_instrumentation_version):
     id_generator = _import_id_generator(id_generator_name)
     # if env var OTEL_RESOURCE_ATTRIBUTES is given, it will read the service_name
     # from the env variable else defaults to "unknown_service"
-    auto_resource = {}
-    # populate version if using auto-instrumentation
-    if auto_instrumentation_version:
-        auto_resource[ResourceAttributes.TELEMETRY_AUTO_VERSION] = auto_instrumentation_version
-    resource = Resource.create(auto_resource)
+    resource = Resource.create()
 
     _init_tracing(
         exporters=trace_exporters,
@@ -96,9 +92,7 @@ def _initialize_components(auto_instrumentation_version):
         sampler=sampler,
         resource=resource,
     )
-    print("metric_exporters---------------------")
-    print(metric_exporters)
-    print("---------------------metric_exporters")
+
     _init_metrics(metric_exporters, resource)
     logging_enabled = os.getenv(_OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED, "false")
     if logging_enabled.strip().lower() == "true":
