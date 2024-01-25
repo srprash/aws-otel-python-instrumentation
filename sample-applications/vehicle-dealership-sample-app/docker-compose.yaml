@@ -28,10 +28,20 @@ services:
       context: .
       dockerfile: VehicleInventoryApp/Dockerfile
     container_name: vehicle-inventory-backend
-    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8001"
+    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && opentelemetry-instrument python3 manage.py runserver 0.0.0.0:8001 --noreload"
     restart: always
     volumes:
       - ./VehicleInventoryApp/.:/vehicle-inventory-app
+    environment:
+      OTEL_SERVICE_NAME: "VehicleInventoryApp"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_SMP_ENABLED: "true"
+      OTEL_PYTHON_DISTRO: "aws_distro"
+      OTEL_PYTHON_CONFIGURATOR: "aws_configurator"
+      DJANGO_SETTINGS_MODULE: "VehicleInventoryApp.settings"
+      OTEL_AWS_SMP_EXPORTER_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
+      OTEL_TRACES_SAMPLER: "always_on"
     ports:
       - "8001:8001"
     depends_on:
@@ -44,11 +54,21 @@ services:
       context: .
       dockerfile: ImageServiceApp/Dockerfile
     container_name: image-service-backend
-    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && opentelemetry-instrument python3 manage.py runserver 0.0.0.0:8000 --noreload"
     restart: always
     volumes:
       - ./ImageServiceApp/.:/image-service-app
       - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
+    environment:
+      OTEL_SERVICE_NAME: "ImageServiceApp"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_SMP_ENABLED: "true"
+      OTEL_PYTHON_DISTRO: "aws_distro"
+      OTEL_PYTHON_CONFIGURATOR: "aws_configurator"
+      DJANGO_SETTINGS_MODULE: "ImageServiceApp.settings"
+      OTEL_AWS_SMP_EXPORTER_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
+      OTEL_TRACES_SAMPLER: "always_on"
     ports:
       - "8000:8000"
 volumes:
