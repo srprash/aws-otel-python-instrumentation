@@ -90,22 +90,7 @@ def _initialize_components(auto_instrumentation_version):
     # populate version if using auto-instrumentation
     if auto_instrumentation_version:
         auto_resource[ResourceAttributes.TELEMETRY_AUTO_VERSION] = auto_instrumentation_version
-    default_resource = Resource.create(auto_resource)
-
-    print("HERE----------default_resource: !!!!!!!!!---------------------")
-    print(default_resource.to_json)
-
-    print("Integrating AwsEksResourceDetector--------------------")
-
-    resource=get_aggregated_resources(
-        [
-            # AwsEc2ResourceDetector(),
-            AwsEksResourceDetector(),
-        ]
-    ).merge(default_resource)
-
-    print("HERE----------resource: !!!!!!!!!---------------------")
-    print(resource.to_json)
+    resource = Resource.create(auto_resource)
 
     _init_tracing(
         exporters=trace_exporters,
