@@ -16,7 +16,7 @@ COPY ImageServiceApp/requirements.txt /image-service-app/
 COPY ImageServiceApp/aws_opentelemetry_distro-0.0.1-py3-none-any.whl /image-service-app/
 COPY ImageServiceApp/opentelemetry_sdk_extension_aws-2.0.1-py3-none-any.whl /image-service-app/
 
-RUN pip install -r requirements.txt && pip install aws_opentelemetry_distro-0.0.1-py3-none-any.whl && pip install opentelemetry_sdk_extension_aws-2.0.1-py3-none-any.whl
+RUN pip install -r requirements.txt && pip install aws_opentelemetry_distro-0.0.1-py3-none-any.whl && pip install opentelemetry_sdk_extension_aws-2.0.1-py3-none-any.whl --force-reinstall
 
 # Copy the project code into the container
 COPY ImageServiceApp/. /image-service-app/

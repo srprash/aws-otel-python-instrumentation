@@ -44,6 +44,8 @@ class AwsMetricAttributesSpanExporter(SpanExporter):
     @override
     def export(self, spans: Sequence[ReadableSpan]) -> SpanExportResult:
         modified_spans: Sequence[ReadableSpan] = self._add_metric_attributes(spans)
+        print("HERE!!!!!!!!!!!!!!-----------------inside AwsMetricAttributesSpanExporter-----------modified_spans:")
+        print(modified_spans)
         return self._delegate.export(modified_spans)
 
     @override

@@ -44,6 +44,8 @@ from opentelemetry.sdk.trace.id_generator import IdGenerator
 from opentelemetry.sdk.trace.sampling import Sampler
 from opentelemetry.semconv.resource import ResourceAttributes
 from opentelemetry.trace import set_tracer_provider
+from opentelemetry.sdk.resources import get_aggregated_resources
+from opentelemetry.sdk.extension.aws.resource.eks import AwsEksResourceDetector
 
 OTEL_SMP_ENABLED = "OTEL_SMP_ENABLED"
 OTEL_METRIC_EXPORT_INTERVAL = "OTEL_METRIC_EXPORT_INTERVAL"
@@ -88,7 +90,22 @@ def _initialize_components(auto_instrumentation_version):
     # populate version if using auto-instrumentation
     if auto_instrumentation_version:
         auto_resource[ResourceAttributes.TELEMETRY_AUTO_VERSION] = auto_instrumentation_version
-    resource = Resource.create(auto_resource)
+    default_resource = Resource.create(auto_resource)
+
+    print("HERE----------default_resource: !!!!!!!!!---------------------")
+    print(default_resource.to_json)
+
+    print("Integrating AwsEksResourceDetector--------------------")
+
+    resource=get_aggregated_resources(
+        [
+            # AwsEc2ResourceDetector(),
+            AwsEksResourceDetector(),
+        ]
+    ).merge(default_resource)
+
+    print("HERE----------resource: !!!!!!!!!---------------------")
+    print(resource.to_json)
 
     _init_tracing(
         exporters=trace_exporters,
