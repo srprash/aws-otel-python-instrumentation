@@ -13,10 +13,8 @@ WORKDIR /vehicle-inventory-app
 
 # Install dependencies
 COPY VehicleInventoryApp/requirements.txt /vehicle-inventory-app/
-COPY VehicleInventoryApp/aws_opentelemetry_distro-0.0.1-py3-none-any.whl /vehicle-inventory-app/
-COPY VehicleInventoryApp/opentelemetry_sdk_extension_aws-2.0.1-py3-none-any.whl /vehicle-inventory-app/
 
-RUN pip install -r requirements.txt && pip install aws_opentelemetry_distro-0.0.1-py3-none-any.whl && pip install opentelemetry_sdk_extension_aws-2.0.1-py3-none-any.whl --force-reinstall
+RUN pip install -r requirements.txt
 
 # Copy the project code into the container
 COPY VehicleInventoryApp/. /vehicle-inventory-app/

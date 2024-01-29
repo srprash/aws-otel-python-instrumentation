@@ -22,6 +22,22 @@ services:
     expose:
       - 3306
 
+  instrumentation-backend:
+    image: pythonsampleapp/adot-autoinstrumentation-python
+    build:
+      context: .
+      dockerfile: autoinstrumentation/Dockerfile
+    volumes:
+      - ./autoinstrumentation/.:/autoinstrumentation
+      - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
+    environment:
+      OTEL_SMP_ENABLED: "true"
+      OTEL_PYTHON_DISTRO: "aws_distro"
+      OTEL_PYTHON_CONFIGURATOR: "aws_configurator"
+      OTEL_AWS_SMP_EXPORTER_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
+      OTEL_TRACES_SAMPLER: "always_on"
+
   vehicle-inventory-backend:
     image: pythonsampleapp/vehicle-inventory-service
     build:
@@ -71,22 +87,6 @@ services:
       OTEL_TRACES_SAMPLER: "always_on"
     ports:
       - "8000:8000"
-
-  instrumentation-backend:
-    image: pythonsampleapp/adot-autoinstrumentation-python
-    build:
-      context: .
-      dockerfile: autoinstrumentation/Dockerfile
-    volumes:
-      - ./autoinstrumentation/.:/autoinstrumentation
-      - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
-    environment:
-      OTEL_SMP_ENABLED: "true"
-      OTEL_PYTHON_DISTRO: "aws_distro"
-      OTEL_PYTHON_CONFIGURATOR: "aws_configurator"
-      OTEL_AWS_SMP_EXPORTER_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://cloudwatch-agent.amazon-cloudwatch:4315"
-      OTEL_TRACES_SAMPLER: "always_on"
 volumes:
   data:
 

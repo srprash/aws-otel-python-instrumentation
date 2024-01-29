@@ -13,10 +13,10 @@ FROM python:3.11 AS build
 
 WORKDIR /operator-build
 
-ADD requirements.txt .
-ADD ../../../aws-opentelemetry-distro .
+ADD autoinstrumentation/requirements.txt .
+ADD autoinstrumentation/aws_opentelemetry_distro-0.0.1-py3-none-any.whl .
 
-RUN mkdir workspace && pip install --target workspace -r requirements.txt && pip install --target workspace aws_opentelemetry_distro
+RUN mkdir workspace && pip install --target workspace -r requirements.txt && pip install --target workspace aws_opentelemetry_distro-0.0.1-py3-none-any.whl
 
 FROM busybox
 

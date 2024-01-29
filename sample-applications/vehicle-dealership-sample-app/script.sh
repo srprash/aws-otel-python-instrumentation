@@ -25,8 +25,8 @@ docker-compose build
 eksctl create cluster --name ${cluster_name} --region ${region} --zones ${region}a,${region}b
 eksctl create addon --name aws-ebs-csi-driver --cluster ${cluster_name} --service-account-role-arn arn:aws:iam::${account}:role/Admin --region ${region} --force
 
-./scripts/push-ecr.sh ${region}
+#./scripts/push-ecr.sh ${region}
 
-#./scripts/set-permissions.sh ${cluster_name} ${region}
-#
-#./scripts/deploy-eks.sh
+./scripts/set-permissions.sh ${cluster_name} ${region}
+
+./scripts/deploy-eks.sh
