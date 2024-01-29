@@ -27,12 +27,29 @@ spec:
         io.kompose.network/imageserviceapp-default: "true"
         io.kompose.service: image-backend
     spec:
+      volumes:
+        - name: python-volume
+          emptyDir:
+            sizeLimit: 1Gi
+      initContainers:
+        - name: python-init-container
+          image: ${REPOSITORY_PREFIX}/pythonsampleapp/adot-autoinstrumentation-python:latest
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "cp -a /autoinstrumentation/. /python-instrumentation"
+          volumeMounts:
+            - name: python-volume
+              mountPath: /python-instrumentation
       containers:
         - args:
             - sh
             - -c
-            - python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && opentelemetry-instrument python3 manage.py runserver 0.0.0.0:8000 --noreload
+            - python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8000 --noreload
           image: ${REPOSITORY_PREFIX}/pythonsampleapp/image-service:latest
+          volumeMounts:
+            - name: python-volume
+              mountPath: /python-instrumentation
           name: image-service-backend
           imagePullPolicy: Always
           ports:
@@ -43,6 +60,8 @@ spec:
           env:
             - name: S3_BUCKET
               value: ${S3_BUCKET}
+            - name: PYTHONPATH
+              value: "/python-instrumentation/opentelemetry/instrumentation/auto_instrumentation:/python-instrumentation"
             - name: OTEL_SERVICE_NAME
               value: "ImageServiceApp"
             - name: OTEL_PYTHON_DISTRO

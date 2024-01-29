@@ -6,6 +6,10 @@ REGION=${1:-"us-east-1"}
 
 aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${REPOSITORY_PREFIX}
 
+aws ecr create-repository --repository-name pythonsampleapp/adot-autoinstrumentation-python --region ${REGION} || true
+docker tag pythonsampleapp/adot-autoinstrumentation-python:latest ${REPOSITORY_PREFIX}/pythonsampleapp/adot-autoinstrumentation-python:latest
+docker push ${REPOSITORY_PREFIX}/pythonsampleapp/adot-autoinstrumentation-python:latest
+
 aws ecr create-repository --repository-name pythonsampleapp/image-service --region ${REGION} || true
 docker tag pythonsampleapp/image-service:latest ${REPOSITORY_PREFIX}/pythonsampleapp/image-service:latest
 docker push ${REPOSITORY_PREFIX}/pythonsampleapp/image-service:latest

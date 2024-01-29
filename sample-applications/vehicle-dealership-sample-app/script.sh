@@ -27,6 +27,6 @@ eksctl create addon --name aws-ebs-csi-driver --cluster ${cluster_name} --servic
 
 ./scripts/push-ecr.sh ${region}
 
-./scripts/set-permissions.sh ${cluster_name} ${region}
-
-./scripts/deploy-eks.sh
+#./scripts/set-permissions.sh ${cluster_name} ${region}
+#
+#./scripts/deploy-eks.sh
