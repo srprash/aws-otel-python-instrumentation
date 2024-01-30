@@ -9,17 +9,19 @@
 # - Grant the necessary access to `/autoinstrumentation` directory. `chmod -R go+r /autoinstrumentation`
 # - For auto-instrumentation by container injection, the Linux command cp is
 #   used and must be availabe in the image.
-FROM python:3.11 AS build
+FROM python:3.10
 
-WORKDIR /operator-build
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-ADD autoinstrumentation/requirements.txt .
-ADD autoinstrumentation/aws_opentelemetry_distro-0.0.1-py3-none-any.whl .
+WORKDIR /autoinstrumentation
 
-RUN mkdir workspace && pip install --target workspace -r requirements.txt && pip install --target workspace aws_opentelemetry_distro-0.0.1-py3-none-any.whl
+COPY autoinstrumentation/requirements.txt /autoinstrumentation/
+ADD autoinstrumentation/aws_opentelemetry_distro-0.0.1-py3-none-any.whl /autoinstrumentation/
 
-FROM busybox
+RUN pip install -r requirements.txt && pip install aws_opentelemetry_distro-0.0.1-py3-none-any.whl
 
-COPY --from=build /operator-build/workspace /autoinstrumentation
+COPY autoinstrumentation/. /autoinstrumentation
 
 RUN chmod -R go+r /autoinstrumentation

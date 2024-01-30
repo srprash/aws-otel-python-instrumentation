@@ -44,7 +44,7 @@ services:
       context: .
       dockerfile: VehicleInventoryApp/Dockerfile
     container_name: vehicle-inventory-backend
-    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && opentelemetry-instrument python3 manage.py runserver 0.0.0.0:8001 --noreload"
+    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8001 --noreload"
     restart: always
     volumes:
       - ./VehicleInventoryApp/.:/vehicle-inventory-app
@@ -70,7 +70,7 @@ services:
       context: .
       dockerfile: ImageServiceApp/Dockerfile
     container_name: image-service-backend
-    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && opentelemetry-instrument python3 manage.py runserver 0.0.0.0:8000 --noreload"
+    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8000 --noreload"
     restart: always
     volumes:
       - ./ImageServiceApp/.:/image-service-app

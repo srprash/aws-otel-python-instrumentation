@@ -1,3 +1,4 @@
+grpcio==1.60.0
 opentelemetry-distro==0.43b0
 # We don't use the distro[otlp] option which automatically includes exporters since gRPC is not appropriate for
 # injected auto-instrumentation, where it has a strict dependency on the OS / Python version the artifact is built for.
@@ -10,6 +11,8 @@ opentelemetry_sdk_extension_aws==2.0.1
 
 opentelemetry-instrumentation==0.43b0
 opentelemetry-propagator-ot-trace==0.43b0
+opentelemetry-exporter-otlp-proto-grpc==1.22.0
+opentelemetry-exporter-otlp-proto-common==1.22.0
 
 # Copied in from https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation
 # except for aws-lambda
