@@ -1,3 +1,5 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 const axios = require('axios');
 const cron = require('node-cron');
 
@@ -13,17 +15,25 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+console.log(vehicleURL)
+console.log(imageUrl)
+
 // sends two requests every minute, 1 POST request and 1 GET request
 const postGetCarsTrafficTask = cron.schedule('* * * * *', async () => {
         console.log('add 1 car every 1 minutes');
         const carData = {"make": "BMW", "model": "M340", "year": 2022, "image_name": "newCar.jpg"}
-        axios.post(`${vehicleURL}/`, carData, { timeout: 10000 })
+        axios.post(`http://${vehicleURL}/`, carData, { timeout: 10000 })
             .catch(err => {
                 console.error(err.response && err.response.data);
             });
         
         // gets image from image service through the vehicle service
-        axios.get(`${vehicleURL}/1/image`, { timeout: 10000 })
+        axios.get(`http://${vehicleURL}/1/image`, { timeout: 10000 })
+            .catch(err => {
+                console.error(`${err.response}, ${err.response.data}`);
+            }); // Catch and log errors
+        
+        axios.get(`http://${vehicleURL}/1`, { timeout: 10000 })
             .catch(err => {
                 console.error(err.response && err.response.data);
             }); // Catch and log errors
@@ -36,13 +46,13 @@ const postGetCarsTrafficBurstTask = cron.schedule('0 * * * *', async () => {
     console.log('add 5 cars within 1 minutes');
     const carData = {"make": "BMW", "model": "M340", "year": 2022, "image_name": "newCar.jpg"}
     for (let i = 0; i < 5; i++) {
-        axios.post(`${vehicleURL}/`, carData, { timeout: 10000 })
+        axios.post(`http://${vehicleURL}/`, carData, { timeout: 10000 })
             .catch(err => {
                 console.error(err.response && err.response.data);
             }); // Catch and log errors
 
         // gets image from image service through the vehicle service
-        axios.get(`${vehicleURL}/1/image`, { timeout: 10000 })
+        axios.get(`http://${vehicleURL}/1/image`, { timeout: 10000 })
             .catch(err => {
                 console.error(err.response && err.response.data);
             }); // Catch and log errors
@@ -58,7 +68,7 @@ const getCarThrottle = cron.schedule('*/5 * * * *', async () => {
     await sleep(sleepSecs*1000);
     throttleSecs = getRandomNumber(5,20);
     console.log(`request will be throttled for ${throttleSecs} seconds`)
-    axios.get(`${vehicleURL}/1`, {params: {"throttle": 5}}, { timeout: 10000 })
+    axios.get(`http://${vehicleURL}/1`, {params: {"throttle": throttleSecs}}, { timeout: 10000 })
         .catch(err => {
             console.error(err.response && err.response.data);
         }); // Catch and log errors
@@ -71,7 +81,7 @@ const getInvalidRequest = cron.schedule('*/5 * * * *', async () => {
     console.log(`sleep ${sleepSecs} seconds`);
     await sleep(sleepSecs*1000);
     console.log("getting non existent car to trigger 404");
-    axios.get(`${vehicleURL}/123456789`, { timeout: 10000 })
+    axios.get(`http://${vehicleURL}/123456789`, { timeout: 10000 })
         .catch(err => {
             console.error(err.response && err.response.data);
         }); // Catch and log errors
@@ -85,7 +95,7 @@ const getNonExistentImage = cron.schedule('*/5 * * * *', async () => {
     console.log(`sleep ${sleepSecs} seconds`);
     await sleep(sleepSecs*1000);
     console.log('get an non existent image to trigger aws error');
-    axios.get(`${imageUrl}/name/doesnotexist.jpeg`)
+    axios.get(`http://${imageUrl}/name/doesnotexist.jpeg`)
         .catch(err => {
             console.error(err.response && err.response.data);
         }); // Catch and log errors
