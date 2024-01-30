@@ -45,23 +45,21 @@ spec:
         - args:
             - sh
             - -c
-            - python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8001 --noreload
+            - python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8001
           image: ${REPOSITORY_PREFIX}/pythonsampleapp/vehicle-inventory-service:latest
           volumeMounts:
             - name: python-volume
               mountPath: /python-instrumentation
           name: vehicle-inventory-backend
           env:
-            - name: MYSQL_DATABASE
+            - name: POSTGRES_DATABASE
               value: vehicle_inventory
-            - name: MYSQL_PASSWORD
-              value: ${MYSQL_PASSWORD}
-            - name: MYSQL_ROOT_PASSWORD
-              value: ${MYSQL_PASSWORD}
-            - name: MYSQL_USER
+            - name: POSTGRES_PASSWORD
+              value: ${POSTGRES_PASSWORD}
+            - name: POSTGRES_USER
               value: djangouser
             - name: PYTHONPATH
-              value: "/python-instrumentation/opentelemetry/instrumentation/auto_instrumentation:/python-instrumentation"
+              value: "../python-instrumentation/opentelemetry/instrumentation/auto_instrumentation:../python-instrumentation"
             - name: OTEL_SERVICE_NAME
               value: "VehicleInventoryApp"
             - name: OTEL_SMP_ENABLED
