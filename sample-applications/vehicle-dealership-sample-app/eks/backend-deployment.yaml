@@ -45,7 +45,7 @@ spec:
         - args:
             - sh
             - -c
-            - python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8001
+            - python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8001 --noreload
           image: ${REPOSITORY_PREFIX}/pythonsampleapp/vehicle-inventory-service:latest
           volumeMounts:
             - name: python-volume
@@ -59,7 +59,7 @@ spec:
             - name: POSTGRES_USER
               value: djangouser
             - name: PYTHONPATH
-              value: "../python-instrumentation/opentelemetry/instrumentation/auto_instrumentation:../python-instrumentation"
+              value: "/python-instrumentation/opentelemetry/instrumentation/auto_instrumentation:/vehicle-inventory-app:/python-instrumentation"
             - name: OTEL_SERVICE_NAME
               value: "VehicleInventoryApp"
             - name: OTEL_SMP_ENABLED
