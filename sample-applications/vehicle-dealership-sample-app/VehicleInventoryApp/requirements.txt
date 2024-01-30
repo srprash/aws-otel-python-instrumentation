@@ -1,7 +1,7 @@
 Django~=5.0
 requests~=2.31.0
-mysqlclient~=2.2.1
 python-dotenv~=1.0.0
+psycopg2~=2.9.9
 opentelemetry-distro==0.43b0
 # We don't use the distro[otlp] option which automatically includes exporters since gRPC is not appropriate for
 # injected auto-instrumentation, where it has a strict dependency on the OS / Python version the artifact is built for.
