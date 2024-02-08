@@ -6,6 +6,7 @@ from logging import getLogger
 import requests
 
 from amazon.opentelemetry.distro.sampler._sampling_rule import _SamplingRule
+from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTargetResponse
 
 _logger = getLogger(__name__)
 
@@ -19,6 +20,7 @@ class _AwsXRaySamplingClient:
         if endpoint is None:
             _logger.error("endpoint must be specified")
         self.__get_sampling_rules_endpoint = endpoint + "/GetSamplingRules"
+        self.__get_sampling_targets_endpoint = endpoint + "/SamplingTargets"
 
     def get_sampling_rules(self) -> [_SamplingRule]:
         sampling_rules = []
@@ -35,7 +37,6 @@ class _AwsXRaySamplingClient:
                     "SamplingRuleRecords is missing in getSamplingRules response: %s", sampling_rules_response
                 )
                 return []
-
             sampling_rules_records = sampling_rules_response["SamplingRuleRecords"]
             for record in sampling_rules_records:
                 if "SamplingRule" not in record:
@@ -49,3 +50,25 @@ class _AwsXRaySamplingClient:
             _logger.error("Error in decoding JSON response: %s", json_err)
 
         return sampling_rules
+
+    def get_sampling_targets_response(self, statistics: [dict]) -> _SamplingTargetResponse:
+        sampling_targets_response: _SamplingTargetResponse = {}
+        headers = {"content-type": "application/json"}
+        try:
+            xray_response = requests.post(url=self.__get_sampling_targets_endpoint, headers=headers, timeout=20, json={
+                "SamplingStatisticsDocuments": statistics
+            })
+            if xray_response is None:
+                _logger.error("GetSamplingTargets response is None")
+                return {}
+            sampling_targets_response = xray_response.json()
+            if "SamplingTargetDocuments" not in sampling_targets_response or "LastRuleModification" not in sampling_targets_response:
+                _logger.error("getSamplingTargets response is invalid")
+                return {}
+            sampling_targets_response = _SamplingTargetResponse(**sampling_targets_response)
+        except requests.exceptions.RequestException as req_err:
+            _logger.error("Request error occurred: %s", req_err)
+        except json.JSONDecodeError as json_err:
+            _logger.error("Error in decoding JSON response: %s", json_err)
+
+        return sampling_targets_response

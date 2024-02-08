@@ -10,7 +10,7 @@ from opentelemetry.sdk.resources import Resource
 class TestAwsXRayRemoteSampler(TestCase):
     def test_create_remote_sampler_with_empty_resource(self):
         rs = AwsXRayRemoteSampler(resource=Resource.get_empty())
-        self.assertIsNotNone(rs._timer)
+        self.assertIsNotNone(rs._rules_timer)
         self.assertEqual(rs._AwsXRayRemoteSampler__polling_interval, 300)
         self.assertIsNotNone(rs._AwsXRayRemoteSampler__xray_client)
         self.assertIsNotNone(rs._AwsXRayRemoteSampler__resource)
@@ -19,7 +19,7 @@ class TestAwsXRayRemoteSampler(TestCase):
         rs = AwsXRayRemoteSampler(
             resource=Resource.create({"service.name": "test-service-name", "cloud.platform": "test-cloud-platform"})
         )
-        self.assertIsNotNone(rs._timer)
+        self.assertIsNotNone(rs._rules_timer)
         self.assertEqual(rs._AwsXRayRemoteSampler__polling_interval, 300)
         self.assertIsNotNone(rs._AwsXRayRemoteSampler__xray_client)
         self.assertIsNotNone(rs._AwsXRayRemoteSampler__resource)
@@ -33,7 +33,7 @@ class TestAwsXRayRemoteSampler(TestCase):
             polling_interval=120,
             log_level=DEBUG,
         )
-        self.assertIsNotNone(rs._timer)
+        self.assertIsNotNone(rs._rules_timer)
         self.assertEqual(rs._AwsXRayRemoteSampler__polling_interval, 120)
         self.assertIsNotNone(rs._AwsXRayRemoteSampler__xray_client)
         self.assertIsNotNone(rs._AwsXRayRemoteSampler__resource)
