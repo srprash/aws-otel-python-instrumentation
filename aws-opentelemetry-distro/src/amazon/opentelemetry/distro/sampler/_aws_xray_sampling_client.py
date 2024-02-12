@@ -52,7 +52,7 @@ class _AwsXRaySamplingClient:
         return sampling_rules
 
     def get_sampling_targets_response(self, statistics: [dict]) -> _SamplingTargetResponse:
-        sampling_targets_response: _SamplingTargetResponse = {}
+        sampling_targets_response = _SamplingTargetResponse(LastRuleModification=None, SamplingTargetDocuments=None, UnprocessedStatistics=None)
         headers = {"content-type": "application/json"}
         try:
             xray_response = requests.post(
@@ -62,15 +62,16 @@ class _AwsXRaySamplingClient:
                 json={"SamplingStatisticsDocuments": statistics},
             )
             if xray_response is None:
-                _logger.error("GetSamplingTargets response is None")
-                return {}
+                _logger.error("GetSamplingTargets response is None. Unable to update targets.")
+                return sampling_targets_response
             sampling_targets_response = xray_response.json()
             if (
                 "SamplingTargetDocuments" not in sampling_targets_response
                 or "LastRuleModification" not in sampling_targets_response
             ):
-                _logger.error("getSamplingTargets response is invalid")
-                return {}
+                _logger.error("getSamplingTargets response is invalid. Unable to update targets.")
+                return sampling_targets_response
+
             sampling_targets_response = _SamplingTargetResponse(**sampling_targets_response)
         except requests.exceptions.RequestException as req_err:
             _logger.error("Request error occurred: %s", req_err)
