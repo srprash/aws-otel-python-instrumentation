@@ -18,8 +18,8 @@ DATA_DIR = os.path.join(TEST_DIR, "data")
 CLIENT_ID = "12345678901234567890abcd"
 
 
-class TestRule(TestCase):
-    def test_rule_attribute_matching_from_xray_response(self):
+class TestSamplingRuleApplier(TestCase):
+    def test_applier_attribute_matching_from_xray_response(self):
         default_rule = None
         with open(f"{DATA_DIR}/get-sampling-rules-response-sample-2.json", encoding="UTF-8") as file:
             sample_response = json.load(file)
@@ -46,7 +46,7 @@ class TestRule(TestCase):
         rule_applier = _SamplingRuleApplier(default_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(res, attr))
 
-    def test_rule_matches_with_all_attributes(self):
+    def test_applier_matches_with_all_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={"abc": "123", "def": "4?6", "ghi": "*89"},
             FixedRate=0.11,
@@ -84,7 +84,7 @@ class TestRule(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(resource, attributes))
 
-    def test_rule_wild_card_attributes_matches_span_attributes(self):
+    def test_applier_wild_card_attributes_matches_span_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={
                 "attr1": "*",
@@ -126,7 +126,7 @@ class TestRule(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(Resource.get_empty(), attributes))
 
-    def test_rule_wild_card_attributes_matches_http_span_attributes(self):
+    def test_applier_wild_card_attributes_matches_http_span_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={},
             FixedRate=0.11,
@@ -152,7 +152,7 @@ class TestRule(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(Resource.get_empty(), attributes))
 
-    def test_rule_wild_card_attributes_matches_with_empty_attributes(self):
+    def test_applier_wild_card_attributes_matches_with_empty_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={},
             FixedRate=0.11,
@@ -184,7 +184,7 @@ class TestRule(TestCase):
         self.assertTrue(rule_applier.matches(None, attributes))
         self.assertTrue(rule_applier.matches(None, None))
 
-    def test_rule_does_not_match_without_http_target(self):
+    def test_applier_does_not_match_without_http_target(self):
         sampling_rule = _SamplingRule(
             Attributes={},
             FixedRate=0.11,
@@ -211,7 +211,7 @@ class TestRule(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
         self.assertFalse(rule_applier.matches(resource, attributes))
 
-    def test_rule_matches_with_http_target(self):
+    def test_applier_matches_with_http_target(self):
         sampling_rule = _SamplingRule(
             Attributes={},
             FixedRate=0.11,
@@ -238,7 +238,7 @@ class TestRule(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(resource, attributes))
 
-    def test_rule_matches_with_span_attributes(self):
+    def test_applier_matches_with_span_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={"abc": "123", "def": "456", "ghi": "789"},
             FixedRate=0.11,
@@ -273,7 +273,7 @@ class TestRule(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(resource, attributes))
 
-    def test_rule_does_not_match_with_less_span_attributes(self):
+    def test_applier_does_not_match_with_less_span_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={"abc": "123", "def": "456", "ghi": "789"},
             FixedRate=0.11,
