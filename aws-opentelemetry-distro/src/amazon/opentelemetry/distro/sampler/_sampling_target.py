@@ -1,6 +1,8 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
+from logging import getLogger
 
+_logger = getLogger(__name__)
 
 # Disable snake_case naming style so this class can match the sampling rules response from X-Ray
 # pylint: disable=invalid-name
@@ -44,9 +46,15 @@ class _SamplingTargetResponse:
         self.SamplingTargetDocuments = []
         if SamplingTargetDocuments is not None:
             for document in SamplingTargetDocuments:
-                self.SamplingTargetDocuments.append(_SamplingTarget(**document))
+                try:
+                    self.SamplingTargetDocuments.append(_SamplingTarget(**document))
+                except TypeError as e:
+                    _logger.debug("TypeError occurred: ", e)
 
         self.UnprocessedStatistics = []
         if UnprocessedStatistics is not None:
             for unprocessed in UnprocessedStatistics:
-                self.UnprocessedStatistics.append(_UnprocessedStatistics(**unprocessed))
+                try:
+                    self.UnprocessedStatistics.append(_UnprocessedStatistics(**unprocessed))
+                except TypeError as e:
+                    _logger.debug("TypeError occurred: ", e)

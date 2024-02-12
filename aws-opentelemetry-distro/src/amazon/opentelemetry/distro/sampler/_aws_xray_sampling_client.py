@@ -48,6 +48,8 @@ class _AwsXRaySamplingClient:
             _logger.error("Request error occurred: %s", req_err)
         except json.JSONDecodeError as json_err:
             _logger.error("Error in decoding JSON response: %s", json_err)
+        except Exception as err:
+            _logger.error("Error occurred when attempting to fetch rules: %s", err)
 
         return sampling_rules
 
@@ -77,5 +79,7 @@ class _AwsXRaySamplingClient:
             _logger.error("Request error occurred: %s", req_err)
         except json.JSONDecodeError as json_err:
             _logger.error("Error in decoding JSON response: %s", json_err)
+        except Exception as err:
+            _logger.error("Error occurred when attempting to fetch targets: %s", err)
 
         return sampling_targets_response
