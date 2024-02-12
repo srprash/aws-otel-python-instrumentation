@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 import datetime
 
 
@@ -8,6 +11,7 @@ class _Clock:
     def now(self) -> datetime:
         return self.__datetime.now()
 
+    # pylint: disable=no-self-use
     def from_timestamp(self, timestamp: float) -> datetime:
         return self.__datetime.fromtimestamp(timestamp)
 

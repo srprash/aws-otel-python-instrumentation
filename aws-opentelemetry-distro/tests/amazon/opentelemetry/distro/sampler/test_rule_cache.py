@@ -11,6 +11,8 @@ from opentelemetry.sdk.resources import Resource
 
 CLIENT_ID = "12345678901234567890abcd"
 
+
+# pylint: disable=no-member
 class TestRuleCache(TestCase):
     def test_cache_update_rules_and_sorts_rules(self):
         cache = _RuleCache(None, None, CLIENT_ID, _Clock(), Lock())

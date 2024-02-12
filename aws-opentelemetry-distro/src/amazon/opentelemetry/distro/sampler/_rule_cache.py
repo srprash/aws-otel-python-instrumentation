@@ -9,7 +9,6 @@ from amazon.opentelemetry.distro.sampler._clock import _Clock
 from amazon.opentelemetry.distro.sampler._fallback_sampler import _FallbackSampler
 from amazon.opentelemetry.distro.sampler._sampling_rule import _SamplingRule
 from amazon.opentelemetry.distro.sampler._sampling_rule_applier import _SamplingRuleApplier
-from amazon.opentelemetry.distro.sampler._sampling_statistics_document import _SamplingStatisticsDocument
 from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTarget, _SamplingTargetResponse
 from opentelemetry.context import Context
 from opentelemetry.sdk.resources import Resource
@@ -23,8 +22,11 @@ _logger = getLogger(__name__)
 CACHE_TTL_SECONDS = 3600
 DEFAULT_TARGET_POLLING_INTERVAL_SECONDS = 10
 
+
 class _RuleCache:
-    def __init__(self, resource: Resource, fallback_sampler: _FallbackSampler, client_id: str, clock: _Clock, lock: Lock):
+    def __init__(
+        self, resource: Resource, fallback_sampler: _FallbackSampler, client_id: str, clock: _Clock, lock: Lock
+    ):
         self.__client_id = client_id
         self.__rule_appliers: [_SamplingRuleApplier] = []
         self.__cache_lock = lock
@@ -76,7 +78,9 @@ class _RuleCache:
         self.__cache_lock.acquire()
 
         # map list of rule appliers by each applier's sampling_rule name
-        rule_applier_map: dict[str,_SamplingRuleApplier] = {applier.sampling_rule.RuleName: applier for applier in self.__rule_appliers}
+        rule_applier_map: dict[str, _SamplingRuleApplier] = {
+            applier.sampling_rule.RuleName: applier for applier in self.__rule_appliers
+        }
 
         # If a sampling rule has not changed, keep its respective applier in the cache.
         new_applier: _SamplingRuleApplier
@@ -96,7 +100,9 @@ class _RuleCache:
 
         self.__cache_lock.acquire()
 
-        rule_applier_map: dict[str,_SamplingRuleApplier] = {applier.sampling_rule.RuleName: applier for applier in self.__rule_appliers}
+        rule_applier_map: dict[str, _SamplingRuleApplier] = {
+            applier.sampling_rule.RuleName: applier for applier in self.__rule_appliers
+        }
         min_polling_interval = None
 
         target: _SamplingTarget

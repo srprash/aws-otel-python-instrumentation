@@ -55,14 +55,20 @@ class _AwsXRaySamplingClient:
         sampling_targets_response: _SamplingTargetResponse = {}
         headers = {"content-type": "application/json"}
         try:
-            xray_response = requests.post(url=self.__get_sampling_targets_endpoint, headers=headers, timeout=20, json={
-                "SamplingStatisticsDocuments": statistics
-            })
+            xray_response = requests.post(
+                url=self.__get_sampling_targets_endpoint,
+                headers=headers,
+                timeout=20,
+                json={"SamplingStatisticsDocuments": statistics},
+            )
             if xray_response is None:
                 _logger.error("GetSamplingTargets response is None")
                 return {}
             sampling_targets_response = xray_response.json()
-            if "SamplingTargetDocuments" not in sampling_targets_response or "LastRuleModification" not in sampling_targets_response:
+            if (
+                "SamplingTargetDocuments" not in sampling_targets_response
+                or "LastRuleModification" not in sampling_targets_response
+            ):
                 _logger.error("getSamplingTargets response is invalid")
                 return {}
             sampling_targets_response = _SamplingTargetResponse(**sampling_targets_response)

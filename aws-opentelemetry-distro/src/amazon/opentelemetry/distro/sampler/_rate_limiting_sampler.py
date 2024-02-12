@@ -1,6 +1,5 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
-import time as _time
 from typing import Optional, Sequence
 
 from amazon.opentelemetry.distro.sampler._clock import _Clock
@@ -13,11 +12,7 @@ from opentelemetry.util.types import Attributes
 
 
 class _RateLimitingSampler(Sampler):
-    def __init__(
-        self,
-        quota: int,
-        clock: _Clock
-    ):
+    def __init__(self, quota: int, clock: _Clock):
         self.__reservoir = _RateLimiter(1, quota, clock)
         self.borrowing = False
 

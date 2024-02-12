@@ -1,7 +1,5 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
-import datetime
-import json
 
 from amazon.opentelemetry.distro.sampler._clock import _Clock
 
@@ -25,5 +23,5 @@ class _SamplingStatisticsDocument:
             "Timestamp": clock.now().timestamp(),
             "RequestCount": self.RequestCount,
             "BorrowCount": self.BorrowCount,
-            "SampleCount": self.SampleCount
+            "SampleCount": self.SampleCount,
         }

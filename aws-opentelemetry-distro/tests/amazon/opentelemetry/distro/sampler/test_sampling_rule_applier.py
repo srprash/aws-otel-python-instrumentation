@@ -17,6 +17,7 @@ DATA_DIR = os.path.join(TEST_DIR, "data")
 
 CLIENT_ID = "12345678901234567890abcd"
 
+
 class TestRule(TestCase):
     def test_rule_attribute_matching_from_xray_response(self):
         default_rule = None
@@ -76,7 +77,7 @@ class TestRule(TestCase):
 
         resource_attr: Resource = {
             ResourceAttributes.SERVICE_NAME: "myServiceName",
-            ResourceAttributes.CLOUD_PLATFORM: "aws_lambda",    # CloudPlatformValues.AWS_LAMBDA.value
+            ResourceAttributes.CLOUD_PLATFORM: "aws_lambda",  # CloudPlatformValues.AWS_LAMBDA.value
         }
         resource = Resource.create(attributes=resource_attr)
 

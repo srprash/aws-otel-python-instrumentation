@@ -11,10 +11,9 @@ from amazon.opentelemetry.distro.sampler._aws_xray_sampling_client import _AwsXR
 from amazon.opentelemetry.distro.sampler._clock import _Clock
 from amazon.opentelemetry.distro.sampler._fallback_sampler import _FallbackSampler
 from amazon.opentelemetry.distro.sampler._rule_cache import DEFAULT_TARGET_POLLING_INTERVAL_SECONDS, _RuleCache
-from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTargetResponse
 from opentelemetry.context import Context
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace.sampling import Decision, ParentBased, Sampler, SamplingResult
+from opentelemetry.sdk.trace.sampling import ParentBased, Sampler, SamplingResult
 from opentelemetry.trace import Link, SpanKind
 from opentelemetry.trace.span import TraceState
 from opentelemetry.util.types import Attributes
@@ -114,7 +113,9 @@ class AwsXRayRemoteSampler(Sampler):
     def __start_sampling_rule_poller(self) -> None:
         self.__get_and_update_sampling_rules()
         # Schedule the next sampling rule poll
-        self._rules_timer = Timer(self.__polling_interval + self.__rule_polling_jitter, self.__start_sampling_rule_poller)
+        self._rules_timer = Timer(
+            self.__polling_interval + self.__rule_polling_jitter, self.__start_sampling_rule_poller
+        )
         self._rules_timer.daemon = True
         self._rules_timer.start()
 
@@ -130,13 +131,15 @@ class AwsXRayRemoteSampler(Sampler):
     def __start_sampling_target_poller(self) -> None:
         self.__get_and_update_sampling_targets()
         # Schedule the next sampling rule poll
-        self._targets_timer = Timer(self.__target_polling_interval + self.__target_polling_jitter, self.__start_sampling_target_poller)
+        self._targets_timer = Timer(
+            self.__target_polling_interval + self.__target_polling_jitter, self.__start_sampling_target_poller
+        )
         self._targets_timer.daemon = True
         self._targets_timer.start()
-    
+
     def __generate_client_id(self) -> str:
-        hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+        hex_chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
         client_id_array = []
-        for _ in range(0,24):
-            client_id_array.append(random.choice(hex))
-        return ''.join(client_id_array)
+        for _ in range(0, 24):
+            client_id_array.append(random.choice(hex_chars))
+        return "".join(client_id_array)

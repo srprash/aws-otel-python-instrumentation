@@ -12,7 +12,7 @@ from amazon.opentelemetry.distro.sampler._sampling_statistics_document import _S
 from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTarget
 from opentelemetry.context import Context
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace.sampling import Decision, ParentBased, Sampler, SamplingResult, TraceIdRatioBased
+from opentelemetry.sdk.trace.sampling import Decision, ParentBased, SamplingResult, TraceIdRatioBased
 from opentelemetry.semconv.resource import CloudPlatformValues, ResourceAttributes
 from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.trace import Link, SpanKind
@@ -57,13 +57,7 @@ class _SamplingRuleApplier:
             self.__rate_limiting_sampler.borrowing = True
 
         sampling_result = self.__reservoir_sampler.should_sample(
-            parent_context,
-            trace_id,
-            name,
-            kind=kind,
-            attributes=attributes,
-            links=links,
-            trace_state=trace_state
+            parent_context, trace_id, name, kind=kind, attributes=attributes, links=links, trace_state=trace_state
         )
 
         if sampling_result.decision is not Decision.DROP:
@@ -71,29 +65,22 @@ class _SamplingRuleApplier:
             has_sampled = True
         else:
             sampling_result = self.__fixed_rate_sampler.should_sample(
-                parent_context,
-                trace_id,
-                name,
-                kind=kind,
-                attributes=attributes,
-                links=links,
-                trace_state=trace_state
+                parent_context, trace_id, name, kind=kind, attributes=attributes, links=links, trace_state=trace_state
             )
             if sampling_result.decision is not Decision.DROP:
                 has_sampled = True
-            
+
         with self.__statistics_lock:
             self.__statistics.RequestCount += 1
-            self.__statistics.BorrowCount += (1 if has_borrowed else 0)
-            self.__statistics.SampleCount += (1 if has_sampled else 0)
+            self.__statistics.BorrowCount += 1 if has_borrowed else 0
+            self.__statistics.SampleCount += 1 if has_sampled else 0
 
         return sampling_result
 
     def get_then_reset_statistics(self) -> dict:
-        self.__statistics_lock.acquire()
-        old_stats = self.__statistics
-        self.__statistics = _SamplingStatisticsDocument(self.__client_id, self.sampling_rule.RuleName)
-        self.__statistics_lock.release()
+        with self.__statistics_lock:
+            old_stats = self.__statistics
+            self.__statistics = _SamplingStatisticsDocument(self.__client_id, self.sampling_rule.RuleName)
 
         return old_stats.snapshot(self._clock)
 
@@ -136,7 +123,7 @@ class _SamplingRuleApplier:
         if url_path is None and url_full is not None:
             scheme_end_index = url_full.find("://")
             # For network calls, URL usually has `scheme://host[:port][path][?query][#fragment]` format
-            # Per spec, http.url is always populated with scheme://host/target.
+            # Per spec, url.full is always populated with scheme://host/target.
             # If scheme doesn't match, assume it's bad instrumentation and ignore.
             if scheme_end_index > -1:
                 # urlparse("scheme://netloc/path;parameters?query#fragment")
