@@ -139,39 +139,46 @@ class TestRuleCache(TestCase):
         rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = 1
         rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__fixed_rate_sampler._root._rate = sampling_rule_1.FixedRate
 
-        target_1 = _SamplingTarget(
-            FixedRate = 0.05,
-            Interval = 15,
-            ReservoirQuota = 1,
-            ReservoirQuotaTTL = time_now.timestamp() + 10,
-            RuleName = "default"
-        )
-        target_2 = _SamplingTarget(
-            FixedRate = 0.15,
-            Interval = 12,
-            ReservoirQuota = 5,
-            ReservoirQuotaTTL = time_now.timestamp() + 10,
-            RuleName = "test"
-        )
-        target_3 = _SamplingTarget(
-            FixedRate = 0.15,
-            Interval = 12,
-            ReservoirQuota = 5,
-            ReservoirQuotaTTL = time_now.timestamp() + 10,
-            RuleName = "associated rule does not exist"
-        )
-        target_response = _SamplingTargetResponse(time_now.timestamp() - 10, [target_1, target_2, target_3], [])
-        rule_cache.update_sampling_targets(target_response)
+        target_1 = {
+            "FixedRate": 0.05,
+            "Interval": 15,
+            "ReservoirQuota": 1,
+            "ReservoirQuotaTTL": mock_clock.now().timestamp() + 10,
+            "RuleName": "default"
+        }
+        target_2 = {
+            "FixedRate": 0.15,
+            "Interval": 12,
+            "ReservoirQuota": 5,
+            "ReservoirQuotaTTL": mock_clock.now().timestamp() + 10,
+            "RuleName": "test"
+        }
+        target_3 = {
+            "FixedRate": 0.15,
+            "Interval": 3,
+            "ReservoirQuota": 5,
+            "ReservoirQuotaTTL": mock_clock.now().timestamp() + 10,
+            "RuleName": "associated rule does not exist"
+        }
+        target_response = _SamplingTargetResponse(mock_clock.now().timestamp() - 10, [target_1, target_2, target_3], [])
+        refresh_rules, min_polling_interval = rule_cache.update_sampling_targets(target_response)
+        self.assertFalse(refresh_rules)
+        # target_3 Interval is ignored since it's not associated with a Rule Applier
+        self.assertEqual(min_polling_interval, target_2["Interval"])
 
         # still only 2 rule appliers should exist if for some reason 3 targets are obtained
         self.assertEqual(len(rule_cache._RuleCache__rule_appliers), 2)
 
         # borrowing=false, use quota from targets
-        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_2.ReservoirQuota
-        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_2.FixedRate
-        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_1.ReservoirQuota
-        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_1.FixedRate
+        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_2["ReservoirQuota"]
+        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_2["FixedRate"]
+        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_1["ReservoirQuota"]
+        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_1["FixedRate"]
 
+        # Test target response modified after Rule cache's last modified date
+        target_response.LastRuleModification = mock_clock.now().timestamp() + 1
+        refresh_rules, _ = rule_cache.update_sampling_targets(target_response)
+        self.assertTrue(refresh_rules)
 
     def test_get_all_statistics(self):
         time_now = datetime.datetime.fromtimestamp(1707551387.0)

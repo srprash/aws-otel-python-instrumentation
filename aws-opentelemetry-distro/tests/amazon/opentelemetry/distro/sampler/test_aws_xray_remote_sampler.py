@@ -7,6 +7,9 @@ from logging import DEBUG
 from unittest import TestCase
 from unittest.mock import patch
 
+from mock_clock import MockClock
+
+from amazon.opentelemetry.distro.sampler import _clock
 from amazon.opentelemetry.distro.sampler._sampling_rule import _SamplingRule
 from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTargetResponse
 from amazon.opentelemetry.distro.sampler.aws_xray_remote_sampler import AwsXRayRemoteSampler
@@ -77,8 +80,8 @@ class TestAwsXRayRemoteSampler(TestCase):
 
 
     @patch("requests.post", side_effect=mocked_requests_get)
-    def test_update_sampling_rules_and_targets_and_should_sample(self, mock_post=None):
-
+    @patch('amazon.opentelemetry.distro.sampler.aws_xray_remote_sampler.DEFAULT_TARGET_POLLING_INTERVAL_SECONDS', new=2)
+    def test_update_sampling_rules_and_targets_with_pollers_and_should_sample(self, mock_post=None):
         rs = AwsXRayRemoteSampler(
             resource=Resource.create({"service.name": "test-service-name", "cloud.platform": "test-cloud-platform"})
         )
@@ -87,7 +90,8 @@ class TestAwsXRayRemoteSampler(TestCase):
         self.assertEqual(rs._AwsXRayRemoteSampler__rule_cache._RuleCache__rule_appliers[0].sampling_rule.RuleName, "test")
         self.assertEqual(rs.should_sample(None, 0, "name", attributes={"abc": "1234"}).decision, Decision.DROP)
 
-        time.sleep(13.0)
+        # wait 2 more seconds since targets polling was patched to 2 seconds (rather than 10s)
+        time.sleep(2.0)
         self.assertNotEqual(rs.should_sample(None, 0, "name", attributes={"abc": "1234"}).decision, Decision.DROP)
         self.assertNotEqual(rs.should_sample(None, 0, "name", attributes={"abc": "1234"}).decision, Decision.DROP)
         self.assertNotEqual(rs.should_sample(None, 0, "name", attributes={"abc": "1234"}).decision, Decision.DROP)

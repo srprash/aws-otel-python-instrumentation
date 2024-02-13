@@ -38,12 +38,12 @@ class _SamplingTargetResponse:
     def __init__(
         self,
         LastRuleModification: float,
-        SamplingTargetDocuments: [_SamplingTarget] = None,
-        UnprocessedStatistics: [_UnprocessedStatistics] = None,
+        SamplingTargetDocuments: [dict] = None,
+        UnprocessedStatistics: [dict] = None,
     ):
-        self.LastRuleModification = LastRuleModification if LastRuleModification is not None else 0.0
+        self.LastRuleModification: float = LastRuleModification if LastRuleModification is not None else 0.0
 
-        self.SamplingTargetDocuments = []
+        self.SamplingTargetDocuments: [_SamplingTarget] = []
         if SamplingTargetDocuments is not None:
             for document in SamplingTargetDocuments:
                 try:
@@ -51,7 +51,7 @@ class _SamplingTargetResponse:
                 except TypeError as e:
                     _logger.debug("TypeError occurred: ", e)
 
-        self.UnprocessedStatistics = []
+        self.UnprocessedStatistics: [_UnprocessedStatistics] = []
         if UnprocessedStatistics is not None:
             for unprocessed in UnprocessedStatistics:
                 try:
