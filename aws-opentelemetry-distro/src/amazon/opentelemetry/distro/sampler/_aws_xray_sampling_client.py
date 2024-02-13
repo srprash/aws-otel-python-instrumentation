@@ -66,15 +66,15 @@ class _AwsXRaySamplingClient:
             if xray_response is None:
                 _logger.error("GetSamplingTargets response is None. Unable to update targets.")
                 return sampling_targets_response
-            sampling_targets_response = xray_response.json()
+            xray_response_json = xray_response.json()
             if (
-                "SamplingTargetDocuments" not in sampling_targets_response
-                or "LastRuleModification" not in sampling_targets_response
+                "SamplingTargetDocuments" not in xray_response_json
+                or "LastRuleModification" not in xray_response_json
             ):
                 _logger.error("getSamplingTargets response is invalid. Unable to update targets.")
                 return sampling_targets_response
 
-            sampling_targets_response = _SamplingTargetResponse(**sampling_targets_response)
+            sampling_targets_response = _SamplingTargetResponse(**xray_response_json)
         except requests.exceptions.RequestException as req_err:
             _logger.error("Request error occurred: %s", req_err)
         except json.JSONDecodeError as json_err:

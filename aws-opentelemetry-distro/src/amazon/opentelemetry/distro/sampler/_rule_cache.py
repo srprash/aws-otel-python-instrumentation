@@ -49,13 +49,7 @@ class _RuleCache:
         for rule_applier in self.__rule_appliers:
             if rule_applier.matches(self.__resource, attributes):
                 return rule_applier.should_sample(
-                    parent_context,
-                    trace_id,
-                    name,
-                    kind=kind,
-                    attributes=attributes,
-                    links=links,
-                    trace_state=trace_state,
+                    parent_context, trace_id, name, kind=kind, attributes=attributes, links=links, trace_state=trace_state
                 )
 
         # Should not ever reach fallback sampler as default rule is able to match
