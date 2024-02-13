@@ -51,7 +51,7 @@ class _SamplingRuleApplier:
         has_borrowed = False
         has_sampled = False
 
-        reservoir_expired: bool = self._clock.now() > self.__reservoir_expiry
+        reservoir_expired: bool = self._clock.now() >= self.__reservoir_expiry
         sampling_result = SamplingResult(decision=Decision.DROP, attributes=attributes, trace_state=trace_state)
         if reservoir_expired:
             self.__rate_limiting_sampler.borrowing = True
@@ -94,7 +94,7 @@ class _SamplingRuleApplier:
         new_quota = target.ReservoirQuota if target.ReservoirQuota is not None else 0
         new_fixed_rate = target.FixedRate if target.FixedRate is not None else 0
         self.__reservoir_sampler = self.__create_reservoir_sampler(new_quota, False)
-        self.__fixed_rate_sampler = TraceIdRatioBased(new_fixed_rate)
+        self.__fixed_rate_sampler = ParentBased(TraceIdRatioBased(new_fixed_rate))
 
         if target.ReservoirQuotaTTL is not None:
             self.__reservoir_expiry = self._clock.from_timestamp(target.ReservoirQuotaTTL)
