@@ -4,9 +4,14 @@ import datetime
 from threading import Lock
 from unittest import TestCase
 
+from mock_clock import MockClock
+
 from amazon.opentelemetry.distro.sampler._clock import _Clock
 from amazon.opentelemetry.distro.sampler._rule_cache import CACHE_TTL_SECONDS, _RuleCache
 from amazon.opentelemetry.distro.sampler._sampling_rule import _SamplingRule
+from amazon.opentelemetry.distro.sampler._sampling_rule_applier import _SamplingRuleApplier
+from amazon.opentelemetry.distro.sampler._sampling_statistics_document import _SamplingStatisticsDocument
+from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTarget, _SamplingTargetResponse
 from opentelemetry.sdk.resources import Resource
 
 CLIENT_ID = "12345678901234567890abcd"
@@ -88,3 +93,116 @@ class TestRuleCache(TestCase):
         cache.update_sampling_rules(rules)
         self.assertTrue(len(cache._RuleCache__rule_appliers) == 1)
         self.assertEqual(cache._RuleCache__rule_appliers[0].sampling_rule.RuleName, "second_rule")
+
+    def test_update_sampling_targets(self):
+        sampling_rule_1 = _SamplingRule(
+            Attributes={},
+            FixedRate=0.05,
+            HTTPMethod="*",
+            Host="*",
+            Priority=10000,
+            ReservoirSize=1,
+            ResourceARN="*",
+            RuleARN="arn:aws:xray:us-east-1:999999999999:sampling-rule/default",
+            RuleName="default",
+            ServiceName="*",
+            ServiceType="*",
+            URLPath="*",
+            Version=1,
+        )
+
+        sampling_rule_2 = _SamplingRule(
+            Attributes={},
+            FixedRate=0.20,
+            HTTPMethod="*",
+            Host="*",
+            Priority=20,
+            ReservoirSize=10,
+            ResourceARN="*",
+            RuleARN="arn:aws:xray:us-east-1:999999999999:sampling-rule/test",
+            RuleName="test",
+            ServiceName="*",
+            ServiceType="*",
+            URLPath="*",
+            Version=1,
+        )
+
+        time_now = datetime.datetime.fromtimestamp(1707551387.0)
+        mock_clock = MockClock(time_now)
+
+        rule_cache = _RuleCache(Resource.get_empty(), None, "", mock_clock, Lock())
+        rule_cache.update_sampling_rules([sampling_rule_1, sampling_rule_2])
+
+        # quota should be 1 because of borrowing=true until targets are updated
+        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = 1
+        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__fixed_rate_sampler._root._rate = sampling_rule_2.FixedRate
+        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = 1
+        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__fixed_rate_sampler._root._rate = sampling_rule_1.FixedRate
+
+        target_1 = _SamplingTarget(
+            FixedRate = 0.05,
+            Interval = 15,
+            ReservoirQuota = 1,
+            ReservoirQuotaTTL = time_now.timestamp() + 10,
+            RuleName = "default"
+        )
+        target_2 = _SamplingTarget(
+            FixedRate = 0.15,
+            Interval = 12,
+            ReservoirQuota = 5,
+            ReservoirQuotaTTL = time_now.timestamp() + 10,
+            RuleName = "test"
+        )
+        target_3 = _SamplingTarget(
+            FixedRate = 0.15,
+            Interval = 12,
+            ReservoirQuota = 5,
+            ReservoirQuotaTTL = time_now.timestamp() + 10,
+            RuleName = "associated rule does not exist"
+        )
+        target_response = _SamplingTargetResponse(time_now.timestamp() - 10, [target_1, target_2, target_3], [])
+        rule_cache.update_sampling_targets(target_response)
+
+        # still only 2 rule appliers should exist if for some reason 3 targets are obtained
+        self.assertEqual(len(rule_cache._RuleCache__rule_appliers), 2)
+
+        # borrowing=false, use quota from targets
+        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_2.ReservoirQuota
+        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_2.FixedRate
+        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_1.ReservoirQuota
+        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_1.FixedRate
+
+
+    def test_get_all_statistics(self):
+        time_now = datetime.datetime.fromtimestamp(1707551387.0)
+        mock_clock = MockClock(time_now)
+        rule_applier_1 = _SamplingRuleApplier(_SamplingRule(RuleName="test"), CLIENT_ID, mock_clock)
+        rule_applier_2 = _SamplingRuleApplier(_SamplingRule(RuleName="default"), CLIENT_ID, mock_clock)
+
+        rule_applier_1._SamplingRuleApplier__statistics = _SamplingStatisticsDocument(CLIENT_ID, "test", 4, 2, 2)
+        rule_applier_2._SamplingRuleApplier__statistics = _SamplingStatisticsDocument(CLIENT_ID, "default", 5, 5, 5)
+
+        rule_cache = _RuleCache(Resource.get_empty(), None, "", mock_clock, Lock())
+        rule_cache._RuleCache__rule_appliers = [rule_applier_1, rule_applier_2]
+
+        mock_clock.add_time(10)
+        statistics = rule_cache.get_all_statistics()
+
+        self.assertEqual(statistics, [
+            {
+                "ClientID": CLIENT_ID,
+                "RuleName": "test",
+                "Timestamp": mock_clock.now().timestamp(),
+                "RequestCount": 4,
+                "BorrowCount": 2,
+                "SampleCount": 2,
+            },
+            {
+                "ClientID": CLIENT_ID,
+                "RuleName": "default",
+                "Timestamp": mock_clock.now().timestamp(),
+                "RequestCount": 5,
+                "BorrowCount": 5,
+                "SampleCount": 5,
+            }
+        ])

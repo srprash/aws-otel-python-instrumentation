@@ -8,7 +8,7 @@ class _Clock:
     def __init__(self):
         self.__datetime = datetime.datetime
 
-    def now(self) -> datetime:
+    def now(self) -> datetime.datetime:
         return self.__datetime.now()
 
     # pylint: disable=no-self-use
