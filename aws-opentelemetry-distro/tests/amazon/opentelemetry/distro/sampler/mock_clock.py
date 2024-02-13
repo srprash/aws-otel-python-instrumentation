@@ -7,10 +7,11 @@ from amazon.opentelemetry.distro.sampler._clock import _Clock
 
 
 class MockClock(_Clock):
-    def __init__(self, dt: datetime.datetime):
+    def __init__(self, dt: datetime.datetime = datetime.datetime.now()):
         self.time_now = dt
+        super()
 
-    def now(self) -> datetime:
+    def now(self) -> datetime.datetime:
         return self.time_now
 
     def add_time(self, seconds: float) -> None:

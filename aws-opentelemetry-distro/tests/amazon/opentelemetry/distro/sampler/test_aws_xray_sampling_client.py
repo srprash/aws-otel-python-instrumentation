@@ -3,7 +3,7 @@
 import json
 import os
 from logging import getLogger
-from unittest import TestCase, mock
+from unittest import TestCase
 from unittest.mock import patch
 
 from amazon.opentelemetry.distro.sampler._aws_xray_sampling_client import _AwsXRaySamplingClient
