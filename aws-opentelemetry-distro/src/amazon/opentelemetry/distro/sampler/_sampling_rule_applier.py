@@ -114,8 +114,12 @@ class _SamplingRuleApplier:
             # also check `HTTP_TARGET/HTTP_URL/HTTP_METHOD/HTTP_HOST` respectively as backup
             url_path = attributes.get(SpanAttributes.URL_PATH, attributes.get(SpanAttributes.HTTP_TARGET, None))
             url_full = attributes.get(SpanAttributes.URL_FULL, attributes.get(SpanAttributes.HTTP_URL, None))
-            http_request_method = attributes.get(SpanAttributes.HTTP_REQUEST_METHOD, attributes.get(SpanAttributes.HTTP_METHOD, None))
-            server_address = attributes.get(SpanAttributes.SERVER_ADDRESS, attributes.get(SpanAttributes.HTTP_HOST, None))
+            http_request_method = attributes.get(
+                SpanAttributes.HTTP_REQUEST_METHOD, attributes.get(SpanAttributes.HTTP_METHOD, None)
+            )
+            server_address = attributes.get(
+                SpanAttributes.SERVER_ADDRESS, attributes.get(SpanAttributes.HTTP_HOST, None)
+            )
 
         # Resource shouldn't be none as it should default to empty resource
         if resource is not None:
@@ -163,21 +167,24 @@ class _SamplingRuleApplier:
             arn = resource.attributes.get(ResourceAttributes.AWS_ECS_CONTAINER_ARN, None)
             if arn is not None:
                 return arn
-        if resource is not None and resource.attributes.get(ResourceAttributes.CLOUD_PLATFORM) == CloudPlatformValues.AWS_LAMBDA.value:
+        if (
+            resource is not None
+            and resource.attributes.get(ResourceAttributes.CLOUD_PLATFORM) == CloudPlatformValues.AWS_LAMBDA.value
+        ):
             return self.__get_lambda_arn(resource, attributes)
         return ""
 
     def __get_lambda_arn(self, resource: Resource, attributes: Attributes) -> str:
-        arn = resource.attributes.get(ResourceAttributes.CLOUD_RESOURCE_ID,
-                resource.attributes.get(ResourceAttributes.FAAS_ID, None))
+        arn = resource.attributes.get(
+            ResourceAttributes.CLOUD_RESOURCE_ID, resource.attributes.get(ResourceAttributes.FAAS_ID, None)
+        )
         if arn is not None:
             return arn
 
         # Note from `SpanAttributes.CLOUD_RESOURCE_ID`:
         # "On some cloud providers, it may not be possible to determine the full ID at startup,
         # so it may be necessary to set cloud.resource_id as a span attribute instead."
-        arn = attributes.get(SpanAttributes.CLOUD_RESOURCE_ID,
-                attributes.get("faas.id", None))
+        arn = attributes.get(SpanAttributes.CLOUD_RESOURCE_ID, attributes.get("faas.id", None))
         if arn is not None:
             return arn
 

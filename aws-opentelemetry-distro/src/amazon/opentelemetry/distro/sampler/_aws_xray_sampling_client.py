@@ -48,13 +48,16 @@ class _AwsXRaySamplingClient:
             _logger.error("Request error occurred: %s", req_err)
         except json.JSONDecodeError as json_err:
             _logger.error("Error in decoding JSON response: %s", json_err)
+        # pylint: disable=broad-exception-caught
         except Exception as err:
             _logger.error("Error occurred when attempting to fetch rules: %s", err)
 
         return sampling_rules
 
     def get_sampling_targets_response(self, statistics: [dict]) -> _SamplingTargetResponse:
-        sampling_targets_response = _SamplingTargetResponse(LastRuleModification=None, SamplingTargetDocuments=None, UnprocessedStatistics=None)
+        sampling_targets_response = _SamplingTargetResponse(
+            LastRuleModification=None, SamplingTargetDocuments=None, UnprocessedStatistics=None
+        )
         headers = {"content-type": "application/json"}
         try:
             xray_response = requests.post(
@@ -64,22 +67,20 @@ class _AwsXRaySamplingClient:
                 json={"SamplingStatisticsDocuments": statistics},
             )
             if xray_response is None:
-                _logger.error("GetSamplingTargets response is None. Unable to update targets.")
+                _logger.debug("GetSamplingTargets response is None. Unable to update targets.")
                 return sampling_targets_response
             xray_response_json = xray_response.json()
-            if (
-                "SamplingTargetDocuments" not in xray_response_json
-                or "LastRuleModification" not in xray_response_json
-            ):
-                _logger.error("getSamplingTargets response is invalid. Unable to update targets.")
+            if "SamplingTargetDocuments" not in xray_response_json or "LastRuleModification" not in xray_response_json:
+                _logger.debug("getSamplingTargets response is invalid. Unable to update targets.")
                 return sampling_targets_response
 
             sampling_targets_response = _SamplingTargetResponse(**xray_response_json)
         except requests.exceptions.RequestException as req_err:
-            _logger.error("Request error occurred: %s", req_err)
+            _logger.debug("Request error occurred: %s", req_err)
         except json.JSONDecodeError as json_err:
-            _logger.error("Error in decoding JSON response: %s", json_err)
+            _logger.debug("Error in decoding JSON response: %s", json_err)
+        # pylint: disable=broad-exception-caught
         except Exception as err:
-            _logger.error("Error occurred when attempting to fetch targets: %s", err)
+            _logger.debug("Error occurred when attempting to fetch targets: %s", err)
 
         return sampling_targets_response

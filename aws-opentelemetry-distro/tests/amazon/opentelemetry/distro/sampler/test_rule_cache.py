@@ -11,7 +11,7 @@ from amazon.opentelemetry.distro.sampler._rule_cache import CACHE_TTL_SECONDS, _
 from amazon.opentelemetry.distro.sampler._sampling_rule import _SamplingRule
 from amazon.opentelemetry.distro.sampler._sampling_rule_applier import _SamplingRuleApplier
 from amazon.opentelemetry.distro.sampler._sampling_statistics_document import _SamplingStatisticsDocument
-from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTarget, _SamplingTargetResponse
+from amazon.opentelemetry.distro.sampler._sampling_target import _SamplingTargetResponse
 from opentelemetry.sdk.resources import Resource
 
 CLIENT_ID = "12345678901234567890abcd"
@@ -134,31 +134,38 @@ class TestRuleCache(TestCase):
         rule_cache.update_sampling_rules([sampling_rule_1, sampling_rule_2])
 
         # quota should be 1 because of borrowing=true until targets are updated
-        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = 1
-        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__fixed_rate_sampler._root._rate = sampling_rule_2.FixedRate
-        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = 1
-        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__fixed_rate_sampler._root._rate = sampling_rule_1.FixedRate
+        rule_applier_0 = rule_cache._RuleCache__rule_appliers[0]
+        self.assertEqual(
+            rule_applier_0._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota, 1
+        )
+        self.assertEqual(rule_applier_0._SamplingRuleApplier__fixed_rate_sampler._root._rate, sampling_rule_2.FixedRate)
+
+        rule_applier_1 = rule_cache._RuleCache__rule_appliers[1]
+        self.assertEqual(
+            rule_applier_1._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota, 1
+        )
+        self.assertEqual(rule_applier_1._SamplingRuleApplier__fixed_rate_sampler._root._rate, sampling_rule_1.FixedRate)
 
         target_1 = {
             "FixedRate": 0.05,
             "Interval": 15,
             "ReservoirQuota": 1,
             "ReservoirQuotaTTL": mock_clock.now().timestamp() + 10,
-            "RuleName": "default"
+            "RuleName": "default",
         }
         target_2 = {
             "FixedRate": 0.15,
             "Interval": 12,
             "ReservoirQuota": 5,
             "ReservoirQuotaTTL": mock_clock.now().timestamp() + 10,
-            "RuleName": "test"
+            "RuleName": "test",
         }
         target_3 = {
             "FixedRate": 0.15,
             "Interval": 3,
             "ReservoirQuota": 5,
             "ReservoirQuotaTTL": mock_clock.now().timestamp() + 10,
-            "RuleName": "associated rule does not exist"
+            "RuleName": "associated rule does not exist",
         }
         target_response = _SamplingTargetResponse(mock_clock.now().timestamp() - 10, [target_1, target_2, target_3], [])
         refresh_rules, min_polling_interval = rule_cache.update_sampling_targets(target_response)
@@ -170,10 +177,19 @@ class TestRuleCache(TestCase):
         self.assertEqual(len(rule_cache._RuleCache__rule_appliers), 2)
 
         # borrowing=false, use quota from targets
-        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_2["ReservoirQuota"]
-        rule_cache._RuleCache__rule_appliers[0]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_2["FixedRate"]
-        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota = target_1["ReservoirQuota"]
-        rule_cache._RuleCache__rule_appliers[1]._SamplingRuleApplier__fixed_rate_sampler._root._rate = target_1["FixedRate"]
+        rule_applier_0 = rule_cache._RuleCache__rule_appliers[0]
+        self.assertEqual(
+            rule_applier_0._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota,
+            target_2["ReservoirQuota"],
+        )
+        self.assertEqual(rule_applier_0._SamplingRuleApplier__fixed_rate_sampler._root._rate, target_2["FixedRate"])
+
+        rule_applier_1 = rule_cache._RuleCache__rule_appliers[1]
+        self.assertEqual(
+            rule_applier_1._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota,
+            target_1["ReservoirQuota"],
+        )
+        self.assertEqual(rule_applier_1._SamplingRuleApplier__fixed_rate_sampler._root._rate, target_1["FixedRate"])
 
         # Test target response modified after Rule cache's last modified date
         target_response.LastRuleModification = mock_clock.now().timestamp() + 1
@@ -195,21 +211,24 @@ class TestRuleCache(TestCase):
         mock_clock.add_time(10)
         statistics = rule_cache.get_all_statistics()
 
-        self.assertEqual(statistics, [
-            {
-                "ClientID": CLIENT_ID,
-                "RuleName": "test",
-                "Timestamp": mock_clock.now().timestamp(),
-                "RequestCount": 4,
-                "BorrowCount": 2,
-                "SampleCount": 2,
-            },
-            {
-                "ClientID": CLIENT_ID,
-                "RuleName": "default",
-                "Timestamp": mock_clock.now().timestamp(),
-                "RequestCount": 5,
-                "BorrowCount": 5,
-                "SampleCount": 5,
-            }
-        ])
+        self.assertEqual(
+            statistics,
+            [
+                {
+                    "ClientID": CLIENT_ID,
+                    "RuleName": "test",
+                    "Timestamp": mock_clock.now().timestamp(),
+                    "RequestCount": 4,
+                    "BorrowCount": 2,
+                    "SampleCount": 2,
+                },
+                {
+                    "ClientID": CLIENT_ID,
+                    "RuleName": "default",
+                    "Timestamp": mock_clock.now().timestamp(),
+                    "RequestCount": 5,
+                    "BorrowCount": 5,
+                    "SampleCount": 5,
+                },
+            ],
+        )

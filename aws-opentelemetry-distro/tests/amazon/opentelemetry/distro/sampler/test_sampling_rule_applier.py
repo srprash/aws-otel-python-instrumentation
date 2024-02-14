@@ -25,6 +25,7 @@ DATA_DIR = os.path.join(TEST_DIR, "data")
 CLIENT_ID = "12345678901234567890abcd"
 
 
+# pylint: disable=no-member
 class TestSamplingRuleApplier(TestCase):
     def test_applier_attribute_matching_from_xray_response(self):
         default_rule = None
@@ -91,7 +92,6 @@ class TestSamplingRuleApplier(TestCase):
             "abc": "123",
             "def": "456",
             "ghi": "789",
-
             # Test that deprecated attributes are not used in matching when above new attributes are set
             "http.host": "deprecated and will not be used in matching",
             SpanAttributes.HTTP_METHOD: "deprecated and will not be used in matching",
@@ -389,15 +389,13 @@ class TestSamplingRuleApplier(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, mock_clock)
 
         self.assertEqual(rule_applier._SamplingRuleApplier__fixed_rate_sampler._root._rate, 0.11)
-        self.assertEqual(rule_applier._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota, 1)
+        self.assertEqual(
+            rule_applier._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota, 1
+        )
         self.assertEqual(rule_applier._SamplingRuleApplier__reservoir_expiry, mock_clock.now())
 
         target = _SamplingTarget(
-            FixedRate = 1.0,
-            Interval = 10,
-            ReservoirQuota = 30,
-            ReservoirQuotaTTL = 1707764006.0,
-            RuleName = "test"
+            FixedRate=1.0, Interval=10, ReservoirQuota=30, ReservoirQuotaTTL=1707764006.0, RuleName="test"
         )
         rule_applier.update_target(target)
 
@@ -405,7 +403,9 @@ class TestSamplingRuleApplier(TestCase):
         mock_clock.set_time(time_now)
 
         self.assertEqual(rule_applier._SamplingRuleApplier__fixed_rate_sampler._root._rate, 1.0)
-        self.assertEqual(rule_applier._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota, 30)
+        self.assertEqual(
+            rule_applier._SamplingRuleApplier__reservoir_sampler._root._RateLimitingSampler__reservoir._quota, 30
+        )
         self.assertEqual(rule_applier._SamplingRuleApplier__reservoir_expiry, mock_clock.now())
 
     @staticmethod
@@ -420,8 +420,8 @@ class TestSamplingRuleApplier(TestCase):
     def fake_ratio_do_not_sample(*args, **kwargs):
         return SamplingResult(decision=Decision.RECORD_AND_SAMPLE, attributes=None, trace_state=None)
 
-    @patch.object(TraceIdRatioBased, 'should_sample', fake_ratio_do_sample)
-    @patch.object(_RateLimitingSampler, 'should_sample', fake_reservoir_do_sample)
+    @patch.object(TraceIdRatioBased, "should_sample", fake_ratio_do_sample)
+    @patch.object(_RateLimitingSampler, "should_sample", fake_reservoir_do_sample)
     def test_populate_and_get_then_reset_statistics(self):
         mock_clock = MockClock()
         rule_applier = _SamplingRuleApplier(_SamplingRule(RuleName="test", ReservoirSize=10), CLIENT_ID, mock_clock)
@@ -445,29 +445,31 @@ class TestSamplingRuleApplier(TestCase):
         reservoir_size = 10
         time_now = datetime.datetime.fromtimestamp(1707551387.0)
         mock_clock = MockClock(time_now)
-        rule_applier = _SamplingRuleApplier(_SamplingRule(RuleName="test", ReservoirSize=reservoir_size, FixedRate=0.0), CLIENT_ID, mock_clock)
+        rule_applier = _SamplingRuleApplier(
+            _SamplingRule(RuleName="test", ReservoirSize=reservoir_size, FixedRate=0.0), CLIENT_ID, mock_clock
+        )
 
         mock_clock.add_time(seconds=2.0)
         sampled_count = 0
-        for _ in range(0,reservoir_size + 10):
+        for _ in range(0, reservoir_size + 10):
             if rule_applier.should_sample(None, 0, "name").decision != Decision.DROP:
                 sampled_count += 1
         self.assertEqual(sampled_count, 1)
         # borrow means only 1 sampled
 
         target = _SamplingTarget(
-            FixedRate = 0.0,
-            Interval = 10,
-            ReservoirQuota = 10,
-            ReservoirQuotaTTL = mock_clock.now().timestamp() + 10,
-            RuleName = "test"
+            FixedRate=0.0,
+            Interval=10,
+            ReservoirQuota=10,
+            ReservoirQuotaTTL=mock_clock.now().timestamp() + 10,
+            RuleName="test",
         )
         rule_applier.update_target(target)
 
         # Use only 100% of quota (10 out of 10), even if 2 seconds have passed
         mock_clock.add_time(seconds=2.0)
         sampled_count = 0
-        for _ in range(0,reservoir_size + 10):
+        for _ in range(0, reservoir_size + 10):
             if rule_applier.should_sample(None, 0, "name").decision != Decision.DROP:
                 sampled_count += 1
         self.assertEqual(sampled_count, reservoir_size)
@@ -475,7 +477,7 @@ class TestSamplingRuleApplier(TestCase):
         # Use only 50% of quota (5 out of 10)
         mock_clock.add_time(seconds=0.5)
         sampled_count = 0
-        for _ in range(0,reservoir_size + 10):
+        for _ in range(0, reservoir_size + 10):
             if rule_applier.should_sample(None, 0, "name").decision != Decision.DROP:
                 sampled_count += 1
         self.assertEqual(sampled_count, 5)
@@ -483,7 +485,7 @@ class TestSamplingRuleApplier(TestCase):
         # Expired, used borrowing logic again
         mock_clock.add_time(seconds=7.5)
         sampled_count = 0
-        for _ in range(0,reservoir_size + 10):
+        for _ in range(0, reservoir_size + 10):
             if rule_applier.should_sample(None, 0, "name").decision != Decision.DROP:
                 sampled_count += 1
         self.assertEqual(sampled_count, 1)

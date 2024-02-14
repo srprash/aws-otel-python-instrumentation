@@ -4,6 +4,7 @@ from logging import getLogger
 
 _logger = getLogger(__name__)
 
+
 # Disable snake_case naming style so this class can match the sampling rules response from X-Ray
 # pylint: disable=invalid-name
 class _SamplingTarget:
@@ -49,7 +50,7 @@ class _SamplingTargetResponse:
                 try:
                     self.SamplingTargetDocuments.append(_SamplingTarget(**document))
                 except TypeError as e:
-                    _logger.debug("TypeError occurred: ", e)
+                    _logger.debug("TypeError occurred: %s", e)
 
         self.UnprocessedStatistics: [_UnprocessedStatistics] = []
         if UnprocessedStatistics is not None:
@@ -57,4 +58,4 @@ class _SamplingTargetResponse:
                 try:
                     self.UnprocessedStatistics.append(_UnprocessedStatistics(**unprocessed))
                 except TypeError as e:
-                    _logger.debug("TypeError occurred: ", e)
+                    _logger.debug("TypeError occurred: %s", e)

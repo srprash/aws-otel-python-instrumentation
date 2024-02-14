@@ -106,7 +106,6 @@ class TestAwsXRaySamplingClient(TestCase):
 
     @patch("requests.post")
     def test_get_sampling_targets(self, mock_post=None):
-        sampling_targets = []
         with open(f"{DATA_DIR}/get-sampling-targets-response-sample.json", encoding="UTF-8") as file:
             sample_response = json.load(file)
             mock_post.return_value.configure_mock(**{"json.return_value": sample_response})
@@ -119,11 +118,15 @@ class TestAwsXRaySamplingClient(TestCase):
 
     @patch("requests.post")
     def test_get_invalid_sampling_targets(self, mock_post=None):
-        mock_post.return_value.configure_mock(**{"json.return_value": {
-            "LastRuleModification": None,
-            "SamplingTargetDocuments": None,
-            "UnprocessedStatistics": None
-        }})
+        mock_post.return_value.configure_mock(
+            **{
+                "json.return_value": {
+                    "LastRuleModification": None,
+                    "SamplingTargetDocuments": None,
+                    "UnprocessedStatistics": None,
+                }
+            }
+        )
         client = _AwsXRaySamplingClient("http://127.0.0.1:2000")
         sampling_targets_response = client.get_sampling_targets_response(statistics=[])
         self.assertEqual(sampling_targets_response.SamplingTargetDocuments, [])

@@ -32,4 +32,3 @@ class TestSamplingStatisticsDocument(TestCase):
         self.assertEqual(snapshot.get("RequestCount"), 1)
         self.assertEqual(snapshot.get("BorrowCount"), 2)
         self.assertEqual(snapshot.get("SampleCount"), 3)
-        
