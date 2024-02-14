@@ -110,10 +110,12 @@ class _SamplingRuleApplier:
         service_name = None
 
         if attributes is not None:
-            url_path = attributes.get(SpanAttributes.URL_PATH, None)
-            url_full = attributes.get(SpanAttributes.URL_FULL, None)
-            http_request_method = attributes.get(SpanAttributes.HTTP_REQUEST_METHOD, None)
-            server_address = attributes.get(SpanAttributes.SERVER_ADDRESS, None)
+            # If `URL_PATH/URL_FULL/HTTP_REQUEST_METHOD/SERVER_ADDRESS` are not populated
+            # also check `HTTP_TARGET/HTTP_URL/HTTP_METHOD/HTTP_HOST` respectively as backup
+            url_path = attributes.get(SpanAttributes.URL_PATH, attributes.get(SpanAttributes.HTTP_TARGET, None))
+            url_full = attributes.get(SpanAttributes.URL_FULL, attributes.get(SpanAttributes.HTTP_URL, None))
+            http_request_method = attributes.get(SpanAttributes.HTTP_REQUEST_METHOD, attributes.get(SpanAttributes.HTTP_METHOD, None))
+            server_address = attributes.get(SpanAttributes.SERVER_ADDRESS, attributes.get(SpanAttributes.HTTP_HOST, None))
 
         # Resource shouldn't be none as it should default to empty resource
         if resource is not None:
@@ -123,8 +125,8 @@ class _SamplingRuleApplier:
         if url_path is None and url_full is not None:
             scheme_end_index = url_full.find("://")
             # For network calls, URL usually has `scheme://host[:port][path][?query][#fragment]` format
-            # Per spec, url.full is always populated with scheme://host/target.
-            # If scheme doesn't match, assume it's bad instrumentation and ignore.
+            # Per spec, url.full is always populated with scheme://
+            # If scheme is not present, assume it's bad instrumentation and ignore.
             if scheme_end_index > -1:
                 # urlparse("scheme://netloc/path;parameters?query#fragment")
                 url_path = urlparse(url_full).path
@@ -161,10 +163,22 @@ class _SamplingRuleApplier:
             arn = resource.attributes.get(ResourceAttributes.AWS_ECS_CONTAINER_ARN, None)
             if arn is not None:
                 return arn
-        if attributes is not None and self.__get_service_type(resource=resource) == cloud_platform_mapping.get(
-            CloudPlatformValues.AWS_LAMBDA.value
-        ):
-            arn = attributes.get(SpanAttributes.CLOUD_RESOURCE_ID, None)
-            if arn is not None:
-                return arn
+        if resource is not None and resource.attributes.get(ResourceAttributes.CLOUD_PLATFORM) == CloudPlatformValues.AWS_LAMBDA.value:
+            return self.__get_lambda_arn(resource, attributes)
+        return ""
+
+    def __get_lambda_arn(self, resource: Resource, attributes: Attributes) -> str:
+        arn = resource.attributes.get(ResourceAttributes.CLOUD_RESOURCE_ID,
+                resource.attributes.get(ResourceAttributes.FAAS_ID, None))
+        if arn is not None:
+            return arn
+
+        # Note from `SpanAttributes.CLOUD_RESOURCE_ID`:
+        # "On some cloud providers, it may not be possible to determine the full ID at startup,
+        # so it may be necessary to set cloud.resource_id as a span attribute instead."
+        arn = attributes.get(SpanAttributes.CLOUD_RESOURCE_ID,
+                attributes.get("faas.id", None))
+        if arn is not None:
+            return arn
+
         return ""

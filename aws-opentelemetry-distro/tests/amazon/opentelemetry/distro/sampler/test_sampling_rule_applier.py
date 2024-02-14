@@ -53,6 +53,17 @@ class TestSamplingRuleApplier(TestCase):
         rule_applier = _SamplingRuleApplier(default_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(res, attr))
 
+        # Test again using deprecated Span Attributes
+        attr: Attributes = {
+            SpanAttributes.HTTP_TARGET: "target",
+            SpanAttributes.HTTP_METHOD: "method",
+            SpanAttributes.HTTP_URL: "url",
+            SpanAttributes.HTTP_HOST: "host",
+            "foo": "bar",
+            "abc": "1234",
+        }
+        self.assertTrue(rule_applier.matches(res, attr))
+
     def test_applier_matches_with_all_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={"abc": "123", "def": "4?6", "ghi": "*89"},
@@ -80,6 +91,12 @@ class TestSamplingRuleApplier(TestCase):
             "abc": "123",
             "def": "456",
             "ghi": "789",
+
+            # Test that deprecated attributes are not used in matching when above new attributes are set
+            "http.host": "deprecated and will not be used in matching",
+            SpanAttributes.HTTP_METHOD: "deprecated and will not be used in matching",
+            "faas.id": "deprecated and will not be used in matching",
+            "http.url": "deprecated and will not be used in matching",
         }
 
         resource_attr: Resource = {
@@ -89,6 +106,18 @@ class TestSamplingRuleApplier(TestCase):
         resource = Resource.create(attributes=resource_attr)
 
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
+        self.assertTrue(rule_applier.matches(resource, attributes))
+
+        # Test using deprecated Span Attributes
+        attributes: Attributes = {
+            "http.host": "localhost",
+            SpanAttributes.HTTP_METHOD: "GET",
+            "faas.id": "arn:aws:lambda:us-west-2:123456789012:function:my-function",
+            "http.url": "http://127.0.0.1:5000/helloworld",
+            "abc": "123",
+            "def": "456",
+            "ghi": "789",
+        }
         self.assertTrue(rule_applier.matches(resource, attributes))
 
     def test_applier_wild_card_attributes_matches_span_attributes(self):
@@ -157,6 +186,15 @@ class TestSamplingRuleApplier(TestCase):
         }
 
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
+        self.assertTrue(rule_applier.matches(Resource.get_empty(), attributes))
+
+        # Test using deprecated Span Attributes
+        attributes: Attributes = {
+            SpanAttributes.HTTP_HOST: "localhost",
+            SpanAttributes.HTTP_METHOD: "GET",
+            SpanAttributes.HTTP_URL: "http://127.0.0.1:5000/helloworld",
+        }
+
         self.assertTrue(rule_applier.matches(Resource.get_empty(), attributes))
 
     def test_applier_wild_card_attributes_matches_with_empty_attributes(self):
@@ -245,6 +283,10 @@ class TestSamplingRuleApplier(TestCase):
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
         self.assertTrue(rule_applier.matches(resource, attributes))
 
+        # Test again using deprecated Span Attributes
+        attributes: Attributes = {SpanAttributes.HTTP_TARGET: "/helloworld"}
+        self.assertTrue(rule_applier.matches(resource, attributes))
+
     def test_applier_matches_with_span_attributes(self):
         sampling_rule = _SamplingRule(
             Attributes={"abc": "123", "def": "456", "ghi": "789"},
@@ -263,7 +305,7 @@ class TestSamplingRuleApplier(TestCase):
         )
 
         attributes: Attributes = {
-            "http.host": "localhost",
+            "server.address": "localhost",
             SpanAttributes.HTTP_REQUEST_METHOD: "GET",
             "url.full": "http://127.0.0.1:5000/helloworld",
             "abc": "123",
@@ -278,6 +320,17 @@ class TestSamplingRuleApplier(TestCase):
         resource = Resource.create(attributes=resource_attr)
 
         rule_applier = _SamplingRuleApplier(sampling_rule, CLIENT_ID, _Clock())
+        self.assertTrue(rule_applier.matches(resource, attributes))
+
+        # Test again using deprecated Span Attributes
+        attributes: Attributes = {
+            "http.host": "localhost",
+            SpanAttributes.HTTP_METHOD: "GET",
+            "http.url": "http://127.0.0.1:5000/helloworld",
+            "abc": "123",
+            "def": "456",
+            "ghi": "789",
+        }
         self.assertTrue(rule_applier.matches(resource, attributes))
 
     def test_applier_does_not_match_with_less_span_attributes(self):
