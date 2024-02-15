@@ -44,7 +44,7 @@ spec:
             - name: S3_BUCKET
               value: ${S3_BUCKET}
             - name: OTEL_SERVICE_NAME
-              value: "ImageServiceApp"
+              value: "image-backend"
             - name: OTEL_PYTHON_DISTRO
               value: "aws_distro"
             - name: OTEL_PYTHON_CONFIGURATOR

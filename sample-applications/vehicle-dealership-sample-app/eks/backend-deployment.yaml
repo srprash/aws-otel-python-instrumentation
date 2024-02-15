@@ -42,7 +42,7 @@ spec:
             - name: POSTGRES_USER
               value: djangouser
             - name: OTEL_SERVICE_NAME
-              value: "VehicleInventoryApp"
+              value: "vehicle-inventory-backend"
             - name: OTEL_SMP_ENABLED
               value: "true"
             - name: OTEL_PYTHON_DISTRO
