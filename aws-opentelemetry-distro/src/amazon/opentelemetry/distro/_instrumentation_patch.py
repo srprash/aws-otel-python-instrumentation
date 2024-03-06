@@ -46,7 +46,7 @@ def _apply_resource_detector_patches() -> None:
     def patch_ec2_aws_http_request(method, path, headers):
         with urlopen(
             Request("http://169.254.169.254" + path, headers=headers, method=method),
-            timeout=5,
+            timeout=0.001,
         ) as response:
             return response.read().decode("utf-8")
 

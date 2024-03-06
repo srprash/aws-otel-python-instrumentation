@@ -56,7 +56,7 @@ def vehicle_by_id(request, vehicle_id):
         return HttpResponse(vehicle_objects)
     if request.method == "DELETE":
         vehicle_objects = Vehicle.objects.filter(id=vehicle_id)
-        vehicle_objects_values = Vehicle.objects.filter(id=vehicle_id).values()
+        vehicle_objects_values = vehicle_objects.values()
         if not vehicle_objects_values:
             return HttpResponseNotFound("Vehicle with id=" + str(vehicle_id) + " is not found")
         vehicle_objects.delete()
@@ -129,7 +129,7 @@ def vehicle_purchase_history_by_id(request, vehicle_purchase_history_id):
         return HttpResponse(vehicle_purchase_history_object)
     if request.method == "DELETE":
         vehicle_purchase_history_object = VehiclePurchaseHistory.objects.filter(id=vehicle_purchase_history_id)
-        vehicle_purchase_history_object_values = Vehicle.objects.filter(id=vehicle_purchase_history_id).values()
+        vehicle_purchase_history_object_values = vehicle_purchase_history_object.values()
         if not vehicle_purchase_history_object_values:
             return HttpResponseNotFound(
                 "VehiclePurchaseHistory with id=" + str(vehicle_purchase_history_id) + " is not found"

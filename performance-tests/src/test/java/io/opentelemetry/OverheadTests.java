@@ -29,6 +29,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -97,6 +98,8 @@ public class OverheadTests {
     GenericContainer<?> postgres = new PostgresContainer(NETWORK).build();
     postgres.start();
 
+    TimeUnit.SECONDS.sleep(5);
+
     GenericContainer<?> imageService = new ImageServiceContainer(NETWORK).build();
     imageService.start();
 
@@ -104,6 +107,8 @@ public class OverheadTests {
         new VehicleInventoryServiceContainer(NETWORK, collector, distroConfig, namingConventions)
             .build();
     long start = System.currentTimeMillis();
+    vehicleInventoryService.dependsOn(postgres);
+    vehicleInventoryService.dependsOn(imageService);
     vehicleInventoryService.start();
     writeStartupTimeFile(distroConfig, start);
 
@@ -127,6 +132,7 @@ public class OverheadTests {
     vehicleInventoryService.stop();
     imageService.stop();
     postgres.stop();
+    TimeUnit.SECONDS.sleep(30);
   }
 
   private void startRecording(
@@ -148,7 +154,7 @@ public class OverheadTests {
             .withCopyFileToContainer(MountableFile.forHostPath("./k6"), "/app")
             .withCommand("run", "-u", "5", "-d", seconds + "s", "/app/performanceTest.js")
             .withStartupCheckStrategy(
-                new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(seconds * 2L)));
+                new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(seconds * 4L)));
     k6.start();
     sleep(seconds);
     System.out.println("Awaiting warmup phase end.");

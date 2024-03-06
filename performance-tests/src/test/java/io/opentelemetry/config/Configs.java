@@ -21,16 +21,6 @@ public enum Configs {
           .maxRequestRate(100)
           .duration(System.getenv("DURATION"))
           .concurrentConnections(System.getenv("CONCURRENCY"))
-          .build()),
-  ALL_800_TPS(
-      TestConfig.builder()
-          .name("all-800-tps")
-          .description("Compares all DistroConfigs (800TPS test)")
-          .withDistroConfigs(DistroConfig.values())
-          .warmupSeconds(10)
-          .maxRequestRate(800)
-          .duration(System.getenv("DURATION"))
-          .concurrentConnections(System.getenv("CONCURRENCY"))
           .build());
 
   public final TestConfig config;

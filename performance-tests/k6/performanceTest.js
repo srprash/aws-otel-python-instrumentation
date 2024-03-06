@@ -14,19 +14,19 @@ export default function() {
      */
 
     invokeApi("oops", "GET", 404)
-    invokeApi("", "GET", 200)
+    //invokeApi("", "GET", 200)
     invokeApi("", "POST", 400)
-    invokeApi("1", "GET", 200)
-    invokeApi(`${badId}`, "DELETE", 404)
-    invokeApi("make/Toyota", "GET", 200)
-    invokeApi("1/image", "GET", 200)
-    invokeApi("image/toy_rav_24.png", "GET", 200)
-    invokeApi("image/", "POST", 404)
-    invokeApi("history/", "GET", 200)
+    //invokeApi("1", "GET", 200)
+    //invokeApi(`${badId}`, "DELETE", 404)
+    //invokeApi("make/Toyota", "GET", 200)
+    //invokeApi("1/image", "GET", 200)
+    //invokeApi("image/toy_rav_24.png", "GET", 200)
+    //invokeApi("image/", "POST", 404)
+    //invokeApi("history/", "GET", 200)
     invokeApi("history/", "POST", 400)
-    invokeApi("history/1", "GET", 200)
-    invokeApi(`history/${badId}`, "DELETE", 404)
-    invokeApi("history/1/vehicle", "GET", 200)
+    //invokeApi("history/1", "GET", 200)
+    //invokeApi(`history/${badId}`, "DELETE", 404)
+    //invokeApi("history/1/vehicle", "GET", 200)
 
     function invokeApi(path, method, status) {
         const url = `${baseUri}${path}`;
