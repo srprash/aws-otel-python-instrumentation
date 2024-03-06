@@ -65,6 +65,11 @@ jobs:
           role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ secrets.E2E_TEST_ROLE_ARN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
+      - name: Set Get ADOT Wheel command environment variable
+        working-directory: terraform/python/ec2
+        run: |
+          echo GET_ADOT_WHEEL_COMMAND="aws s3 cp s3://aws-appsignals-sample-app-prod-${{ env.AWS_DEFAULT_REGION }}/${{ env.ADOT_WHEEL_NAME }} ./${{ env.ADOT_WHEEL_NAME }} && python3.9 -m pip install ${{ env.ADOT_WHEEL_NAME }}" >> $GITHUB_ENV
+
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -90,7 +95,7 @@ jobs:
               -var="test_id=${{ env.TESTING_ID }}" \
               -var="sample_app_zip=${{ env.SAMPLE_APP_ZIP }}" \
               -var="get_cw_agent_rpm_command=${{ env.GET_CW_AGENT_RPM_COMMAND }}" \
-              -var="adot_wheel_name=${{ env.ADOT_WHEEL_NAME }}" \
+              -var="get_adot_wheel_command=${{ env.GET_ADOT_WHEEL_COMMAND }}" \
             || deployment_failed=$?
           
             if [ $deployment_failed -eq 1 ]; then
