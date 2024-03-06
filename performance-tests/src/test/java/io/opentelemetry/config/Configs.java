@@ -12,13 +12,13 @@ import java.util.stream.Stream;
 
 /** Defines all test configurations */
 public enum Configs {
-  ALL_100_TPS(
+  ALL_800_TPS(
       TestConfig.builder()
-          .name("all-100-tps")
-          .description("Compares all DistroConfigs (100TPS test)")
+          .name("all-800-tps")
+          .description("Compares all DistroConfigs (800TPS test)")
           .withDistroConfigs(DistroConfig.values())
           .warmupSeconds(10)
-          .maxRequestRate(100)
+          .maxRequestRate(800)
           .duration(System.getenv("DURATION"))
           .concurrentConnections(System.getenv("CONCURRENCY"))
           .build());
