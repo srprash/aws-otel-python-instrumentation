@@ -83,5 +83,34 @@ jobs:
           bash scripts/set-up-contract-tests.sh
           pip install pytest
           pytest contract-tests/tests
+          
+
+
+
+  default-region-output:
+    runs-on: ubuntu-latest
+    outputs:
+      aws_default_region: ${{ steps.default_region_output.outputs.aws_default_region }}
+    steps:
+      - name: Set default region output
+        id: default_region_output
+        run: |
+          echo "aws_default_region=${{ env.AWS_DEFAULT_REGION }}" >> $GITHUB_OUTPUT
+
+ # AppSignals specific e2e tests for ec2
+  appsignals-python-e2e-ec2-test:
+    needs: [ build, default-region-output ]
+    steps:
+      - name: Checkout code and workflow
+        uses: actions/checkout@v4
+        with:
+          repository: aws-observability/aws-application-signals-test-framework
+          ref: ec2_e2e_python
+      - name: Run python e2e ec2 test
+        uses: ./.github/workflows/appsignals-e2e-ec2-test.yml
+        secrets: inherit
+        with:
+          aws-region: ${{ needs.default-region-output.outputs.aws_default_region }}
+          caller-workflow-name: 'main-build'
 
 #  TODO: Add E2E tests
