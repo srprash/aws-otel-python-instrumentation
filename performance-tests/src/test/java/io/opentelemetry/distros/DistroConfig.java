@@ -10,16 +10,29 @@ import java.util.Collections;
 import java.util.Map;
 
 public enum DistroConfig {
-  NONE("none", "no distro at all", false, Collections.EMPTY_MAP),
+  NONE(
+      "none",
+      "no distro at all",
+      false,
+      "performance-test/vehicle-inventory-service",
+      Collections.EMPTY_MAP),
+  OTEL_VANILLA(
+      "vanilla_otel",
+      "vanilla otel distro without app signals",
+      true,
+      "performance-test/vehicle-inventory-service-otel" ,
+      Collections.EMPTY_MAP),
   APPLICATION_SIGNALS_DISABLED(
       "app_signals_disabled",
       "ADOT distro with Application Signals disabled",
       true,
+      "performance-test/vehicle-inventory-service",
       Map.of("OTEL_AWS_APP_SIGNALS_ENABLED", "false", "OTEL_TRACES_SAMPLER", "xray")),
   APPLICATION_SIGNALS_NO_TRACES(
       "app_signals_no_traces",
       "ADOT distro with Application Signals enabled and no tracing",
       true,
+      "performance-test/vehicle-inventory-service",
       Map.of(
           "OTEL_AWS_APP_SIGNALS_ENABLED",
           "true",
@@ -31,6 +44,7 @@ public enum DistroConfig {
       "app_signals_traces",
       "ADOT distro with Application Signals enabled and tracing",
       true,
+      "performance-test/vehicle-inventory-service",
       Map.of(
           "OTEL_AWS_APP_SIGNALS_ENABLED",
           "true",
@@ -42,16 +56,19 @@ public enum DistroConfig {
   private final String name;
   private final String description;
   private final boolean doInstrument;
+  private final String imageName;
   private final Map<String, String> additionalEnvVars;
 
   DistroConfig(
       String name,
       String description,
       boolean doInstrument,
+      String imageName,
       Map<String, String> additionalEnvVars) {
     this.name = name;
     this.description = description;
     this.doInstrument = doInstrument;
+    this.imageName = imageName;
     this.additionalEnvVars = additionalEnvVars;
   }
 
@@ -65,6 +82,10 @@ public enum DistroConfig {
 
   public boolean doInstrument() {
     return doInstrument;
+  }
+
+  public String imageName() {
+    return imageName;
   }
 
   public Map<String, String> getAdditionalEnvVars() {

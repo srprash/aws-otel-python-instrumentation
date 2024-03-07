@@ -44,7 +44,7 @@ public class VehicleInventoryServiceContainer {
 
   public GenericContainer<?> build() {
     GenericContainer<?> container =
-        new GenericContainer<>(DockerImageName.parse("performance-test/vehicle-inventory-service"))
+        new GenericContainer<>(DockerImageName.parse(distroConfig.imageName()))
             .withNetwork(network)
             .withNetworkAliases("vehicle-service")
             .withLogConsumer(new Slf4jLogConsumer(logger))
