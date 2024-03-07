@@ -1,6 +1,7 @@
 /*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
+ * Modifications Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  */
 
 package io.opentelemetry.config;
@@ -16,14 +17,14 @@ public class TestConfig {
 
   private static final int DEFAULT_MAX_REQUEST_RATE = 0; // none
   private static final int DEFAULT_CONCURRENT_CONNECTIONS = 5;
-  private static final int DEFAULT_TOTAL_ITERATIONS = 5000;
+  private static final String DEFAULT_DURATION = "10s";
 
   private final String name;
   private final String description;
   private final List<DistroConfig> distroConfigs;
   private final int maxRequestRate;
   private final int concurrentConnections;
-  private final int totalIterations;
+  private final String duration;
   private final int warmupSeconds;
 
   public TestConfig(Builder builder) {
@@ -32,7 +33,7 @@ public class TestConfig {
     this.distroConfigs = Collections.unmodifiableList(builder.distroConfigs);
     this.maxRequestRate = builder.maxRequestRate;
     this.concurrentConnections = builder.concurrentConnections;
-    this.totalIterations = builder.totalIterations;
+    this.duration = builder.duration;
     this.warmupSeconds = builder.warmupSeconds;
   }
 
@@ -56,8 +57,8 @@ public class TestConfig {
     return concurrentConnections;
   }
 
-  public int getTotalIterations() {
-    return totalIterations;
+  public String getDuration() {
+    return duration;
   }
 
   public int getWarmupSeconds() {
@@ -74,7 +75,7 @@ public class TestConfig {
     private List<DistroConfig> distroConfigs = new ArrayList<>();
     private int maxRequestRate = DEFAULT_MAX_REQUEST_RATE;
     private int concurrentConnections = DEFAULT_CONCURRENT_CONNECTIONS;
-    private int totalIterations = DEFAULT_TOTAL_ITERATIONS;
+    private String duration = DEFAULT_DURATION;
     public int warmupSeconds = 0;
 
     Builder name(String name) {
@@ -97,13 +98,17 @@ public class TestConfig {
       return this;
     }
 
-    Builder concurrentConnections(int concurrentConnections) {
-      this.concurrentConnections = concurrentConnections;
+    Builder concurrentConnections(String concurrentConnections) {
+      if (concurrentConnections != null && !concurrentConnections.isEmpty()) {
+        this.concurrentConnections = Integer.parseInt(concurrentConnections);
+      }
       return this;
     }
 
-    Builder totalIterations(int totalIterations) {
-      this.totalIterations = totalIterations;
+    Builder duration(String duration) {
+      if (duration != null) {
+        this.duration = duration;
+      }
       return this;
     }
 

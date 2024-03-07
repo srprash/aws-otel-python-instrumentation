@@ -1,11 +1,10 @@
 /*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
+ * Modifications Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  */
 
 package io.opentelemetry.results;
-
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import io.opentelemetry.config.TestConfig;
 import java.io.PrintStream;
@@ -28,9 +27,7 @@ class PrintStreamPersister implements ResultsPersister {
     out.println("----------------------------------------------------------");
     out.println(" Run at " + new Date());
     out.printf(" %s : %s\n", config.getName(), config.getDescription());
-    out.printf(
-        " %d users, %d iterations\n",
-        config.getConcurrentConnections(), config.getTotalIterations());
+    out.printf(" %d users, %s duration\n", config.getConcurrentConnections(), config.getDuration());
     out.println("----------------------------------------------------------");
 
     display(results, "DistroConfig", appPerfResults -> appPerfResults.distroConfig.getName());
@@ -43,34 +40,54 @@ class PrintStreamPersister implements ResultsPersister {
               "%02d:%02d:%02d",
               duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
         });
-    display(results, "Avg. CPU (user) %", res -> String.valueOf(res.averageJvmUserCpu));
-    display(results, "Max. CPU (user) %", res -> String.valueOf(res.maxJvmUserCpu));
-    display(results, "Avg. mch tot cpu %", res -> String.valueOf(res.averageMachineCpuTotal));
     display(results, "Startup time (ms)", res -> String.valueOf(res.startupDurationMs));
-    display(results, "Total allocated MB", res -> format(res.getTotalAllocatedMB()));
-    display(results, "Min heap used (MB)", res -> format(res.getMinHeapUsedMB()));
-    display(results, "Max heap used (MB)", res -> format(res.getMaxHeapUsedMB()));
-    display(results, "Thread switch rate", res -> String.valueOf(res.maxThreadContextSwitchRate));
-    display(results, "GC time (ms)", res -> String.valueOf(NANOSECONDS.toMillis(res.totalGCTime)));
-    display(
-        results,
-        "GC pause time (ms)",
-        res -> String.valueOf(NANOSECONDS.toMillis(res.totalGcPauseNanos)));
-    display(results, "Req. mean (ms)", res -> format(res.requestAvg));
-    display(results, "Req. p95 (ms)", res -> format(res.requestP95));
-    display(results, "Iter. mean (ms)", res -> format(res.iterationAvg));
-    display(results, "Iter. p95 (ms)", res -> format(res.iterationP95));
-    display(results, "Net read avg (bps)", res -> format(res.averageNetworkRead));
-    display(results, "Net write avg (bps)", res -> format(res.averageNetworkWrite));
+    display(results, "Req. Count", res -> format(res.requestCount));
+    display(results, "Req. Rate", res -> format(res.requestRate));
+    display(results, "Req. Lat. mean (ms)", res -> format(res.requestLatencyAvg));
+    display(results, "Req. Lat. p0 (ms)", res -> format(res.requestLatencyP0));
+    display(results, "Req. Lat. p50 (ms)", res -> format(res.requestLatencyP50));
+    display(results, "Req. Lat. p90 (ms)", res -> format(res.requestLatencyP90));
+    display(results, "Req. Lat. p99 (ms)", res -> format(res.requestLatencyP99));
+    display(results, "Req. Lat. p100 (ms)", res -> format(res.requestLatencyP100));
+    display(results, "Net Sent mean (B)", res -> format(res.networkBytesSentAvg));
+    display(results, "Net Sent p0 (B)", res -> format(res.networkBytesSentP0));
+    display(results, "Net Sent p50 (B)", res -> format(res.networkBytesSentP50));
+    display(results, "Net Sent p90 (B)", res -> format(res.networkBytesSentP90));
+    display(results, "Net Sent p99 (B)", res -> format(res.networkBytesSentP99));
+    display(results, "Net Sent p100 (B)", res -> format(res.networkBytesSentP100));
+    display(results, "Net Recv mean (B)", res -> format(res.networkBytesRecvAvg));
+    display(results, "Net Recv p0 (B)", res -> format(res.networkBytesRecvP0));
+    display(results, "Net Recv p50 (B)", res -> format(res.networkBytesRecvP50));
+    display(results, "Net Recv p90 (B)", res -> format(res.networkBytesRecvP90));
+    display(results, "Net Recv p99 (B)", res -> format(res.networkBytesRecvP99));
+    display(results, "Net Recv p100 (B)", res -> format(res.networkBytesRecvP100));
+    display(results, "CPU Usage mean %", res -> format(res.cpuAvg));
+    display(results, "CPU Usage p0 %", res -> format(res.cpuP0));
+    display(results, "CPU Usage p50 %", res -> format(res.cpuP50));
+    display(results, "CPU Usage p90 %", res -> format(res.cpuP90));
+    display(results, "CPU Usage p99 %", res -> format(res.cpuP99));
+    display(results, "CPU Usage p100 %", res -> format(res.cpuP100));
+    display(results, "RSS Mem mean (MB)", res -> format(res.bytesToMegs(res.rssMemAvg)));
+    display(results, "RSS Mem p0 (MB)", res -> format(res.bytesToMegs(res.rssMemP0)));
+    display(results, "RSS Mem p50 (MB)", res -> format(res.bytesToMegs(res.rssMemP50)));
+    display(results, "RSS Mem p90 (MB)", res -> format(res.bytesToMegs(res.rssMemP90)));
+    display(results, "RSS Mem p99 (MB)", res -> format(res.bytesToMegs(res.rssMemP99)));
+    display(results, "RSS Mem p100 (MB)", res -> format(res.bytesToMegs(res.rssMemP100)));
+    display(results, "VMS Mem mean (MB)", res -> format(res.bytesToMegs(res.vmsMemAvg)));
+    display(results, "VMS Mem p0 (MB)", res -> format(res.bytesToMegs(res.vmsMemP0)));
+    display(results, "VMS Mem p50 (MB)", res -> format(res.bytesToMegs(res.vmsMemP50)));
+    display(results, "VMS Mem p90 (MB)", res -> format(res.bytesToMegs(res.vmsMemP90)));
+    display(results, "VMS Mem p99 (MB)", res -> format(res.bytesToMegs(res.vmsMemP99)));
+    display(results, "VMS Mem p100 (MB)", res -> format(res.bytesToMegs(res.vmsMemP100)));
     display(results, "Peak threads", res -> String.valueOf(res.peakThreadCount));
   }
 
   private void display(
       List<AppPerfResults> results, String pref, Function<AppPerfResults, String> vs) {
-    out.printf("%-20s: ", pref);
+    out.printf("%-30s: ", pref);
     results.forEach(
         result -> {
-          out.printf("%17s", vs.apply(result));
+          out.printf("%25s", vs.apply(result));
         });
     out.println();
   }

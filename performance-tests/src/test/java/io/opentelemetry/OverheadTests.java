@@ -88,6 +88,12 @@ public class OverheadTests {
     vehicleInventoryService.start();
     writeStartupTimeFile(distroConfig, start);
 
+    String[] command = {
+        "sh",
+        "installPython.sh"
+    };
+    vehicleInventoryService.execInContainer(command);
+
     if (config.getWarmupSeconds() > 0) {
       doWarmupPhase(config, vehicleInventoryService);
     }
@@ -113,15 +119,11 @@ public class OverheadTests {
 
   private void startRecording(
       DistroConfig distroConfig, GenericContainer<?> vehicleInventoryService) throws Exception {
-    Path outFile = namingConventions.container.jfrFile(distroConfig);
     String[] command = {
-      "jcmd",
-      "1",
-      "JFR.start",
-      "settings=/app/overhead.jfc",
-      "dumponexit=true",
-      "name=petclinic",
-      "filename=" + outFile
+        "sh",
+        "executeProfiler.sh",
+        namingConventions.container.performanceMetricsFileWithoutPath(distroConfig),
+        namingConventions.container.root()
     };
     vehicleInventoryService.execInContainer(command);
   }
@@ -130,19 +132,6 @@ public class OverheadTests {
       throws IOException, InterruptedException {
     System.out.println(
         "Performing startup warming phase for " + testConfig.getWarmupSeconds() + " seconds...");
-
-    // excluding the JFR recording from the warmup causes strange inconsistencies in the results
-    System.out.println("Starting disposable JFR warmup recording...");
-    String[] startCommand = {
-      "jcmd",
-      "1",
-      "JFR.start",
-      "settings=/app/overhead.jfc",
-      "dumponexit=true",
-      "name=warmup",
-      "filename=warmup.jfr"
-    };
-    vehicleInventoryService.execInContainer(startCommand);
 
     long deadline =
         System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(testConfig.getWarmupSeconds());

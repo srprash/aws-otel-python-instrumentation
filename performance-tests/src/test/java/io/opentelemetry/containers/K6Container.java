@@ -1,6 +1,7 @@
 /*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
+ * Modifications Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  */
 
 package io.opentelemetry.containers;
@@ -48,14 +49,16 @@ public class K6Container {
         .withCreateContainerCmdModifier(cmd -> cmd.withUser("root"))
         .withCommand(
             "run",
-            "-u",
+            "--vus",
             String.valueOf(config.getConcurrentConnections()),
-            "-i",
-            String.valueOf(config.getTotalIterations()),
+            "--duration",
+            String.valueOf(config.getDuration()),
             "--rps",
             String.valueOf(config.getMaxRequestRate()),
             "--summary-export",
             k6OutputFile.toString(),
+            "--summary-trend-stats",
+            "avg,p(0),p(50),p(90),p(99),p(100),count",
             "/app/basic.js")
         .withStartupCheckStrategy(
             new OneShotStartupCheckStrategy().withTimeout(Duration.ofMinutes(15)));

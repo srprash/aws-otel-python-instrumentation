@@ -1,6 +1,7 @@
 /*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
+ * Modifications Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  */
 
 package io.opentelemetry.config;
@@ -11,13 +12,27 @@ import java.util.stream.Stream;
 
 /** Defines all test configurations */
 public enum Configs {
-  RELEASE(
+  JAVA_100_TPS(
       TestConfig.builder()
-          .name("release")
-          .description("compares no distro, latest stable, and latest snapshot distro")
+          .name("java-100-tps")
+          .description("Compares all DistroConfigs (100TPS test)")
           .withDistroConfigs(
               DistroConfig.NONE, DistroConfig.LATEST_RELEASE, DistroConfig.LATEST_SNAPSHOT)
-          .warmupSeconds(60)
+          .warmupSeconds(10)
+          .maxRequestRate(100)
+          .duration(System.getenv("DURATION"))
+          .concurrentConnections(System.getenv("CONCURRENCY"))
+          .build()),
+  JAVA_800_TPS(
+      TestConfig.builder()
+          .name("java-800-tps")
+          .description("Compares all DistroConfigs (800TPS test)")
+          .withDistroConfigs(
+              DistroConfig.NONE, DistroConfig.LATEST_RELEASE, DistroConfig.LATEST_SNAPSHOT)
+          .warmupSeconds(10)
+          .maxRequestRate(800)
+          .duration(System.getenv("DURATION"))
+          .concurrentConnections(System.getenv("CONCURRENCY"))
           .build());
 
   public final TestConfig config;
