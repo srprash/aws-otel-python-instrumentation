@@ -1,0 +1,4 @@
+#!/bin/bash
+aws s3api get-object --bucket pulse-sdk-perf-test --key run-java-test.sh ./run-java-test.sh
+chmod +x run-java-test.sh
+./run-java-test.sh

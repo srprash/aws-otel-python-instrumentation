@@ -23,14 +23,14 @@ public enum Configs {
           .duration(System.getenv("DURATION"))
           .concurrentConnections(System.getenv("CONCURRENCY"))
           .build()),
-  JAVA_800_TPS(
+  JAVA_500_TPS(
       TestConfig.builder()
-          .name("java-800-tps")
-          .description("Compares all DistroConfigs (800TPS test)")
+          .name("java-500-tps")
+          .description("Compares all DistroConfigs (500TPS test)")
           .withDistroConfigs(
               DistroConfig.NONE, DistroConfig.LATEST_RELEASE, DistroConfig.LATEST_SNAPSHOT)
           .warmupSeconds(10)
-          .maxRequestRate(800)
+          .maxRequestRate(500)
           .duration(System.getenv("DURATION"))
           .concurrentConnections(System.getenv("CONCURRENCY"))
           .build());

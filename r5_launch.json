@@ -1,0 +1,36 @@
+{
+  "MaxCount": 10,
+  "MinCount": 10,
+  "ImageId": "ami-07761f3ae34c4478d",
+  "InstanceType": "r5.2xlarge",
+  "EbsOptimized": true,
+  "UserData": "IyEvYmluL2Jhc2gKYXdzIHMzYXBpIGdldC1vYmplY3QgLS1idWNrZXQgcHVsc2Utc2RrLXBlcmYtdGVzdCAtLWtleSBydW4tamF2YS10ZXN0LnNoIC4vcnVuLWphdmEtdGVzdC5zaApjaG1vZCAreCBydW4tamF2YS10ZXN0LnNoCi4vcnVuLWphdmEtdGVzdC5zaAo=",
+  "NetworkInterfaces": [
+    {
+      "AssociatePublicIpAddress": true,
+      "DeviceIndex": 0,
+      "Groups": [
+        "sg-0fc331ae7f7841863"
+      ]
+    }
+  ],
+  "TagSpecifications": [
+    {
+      "ResourceType": "instance",
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "pulse-sdk-perf-test-java"
+        }
+      ]
+    }
+  ],
+  "IamInstanceProfile": {
+    "Arn": "arn:aws:iam::511404824078:instance-profile/S3ReadWrite_pulse-sdk-perf-test"
+  },
+  "PrivateDnsNameOptions": {
+    "HostnameType": "ip-name",
+    "EnableResourceNameDnsARecord": true,
+    "EnableResourceNameDnsAAAARecord": false
+  }
+}

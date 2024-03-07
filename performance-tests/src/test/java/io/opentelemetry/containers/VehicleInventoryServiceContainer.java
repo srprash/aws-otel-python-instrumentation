@@ -63,6 +63,12 @@ public class VehicleInventoryServiceContainer {
                 namingConventions.localResults(), namingConventions.containerResults())
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource("overhead.jfc"), "/app/overhead.jfc")
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("executeProfiler.sh"), "/app/executeProfiler.sh")
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("profiler.py"), "/app/profiler.py")
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("installPython.sh"), "/app/installPython.sh")
             .waitingFor(Wait.forHttp("/petclinic/actuator/health").forPort(PETCLINIC_PORT))
             .withEnv("spring_profiles_active", "postgresql,spring-data-jpa")
             .withEnv(

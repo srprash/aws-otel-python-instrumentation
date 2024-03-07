@@ -1,6 +1,7 @@
 #!/bin/sh
 
-RUN apk add --no-cache python3 \
+apk add --no-cache python3 \
+&& apk add gcc python3-dev musl-dev linux-headers \
 && python3 -m ensurepip \
 && pip3 install --upgrade pip setuptools \
 && pip3 install psutil \
