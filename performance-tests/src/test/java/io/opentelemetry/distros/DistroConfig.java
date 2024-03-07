@@ -17,11 +17,41 @@ public class DistroConfig {
   static final String OTEL_LATEST =
       "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar";
 
-  public static final DistroConfig NONE = new DistroConfig("none", "no distro at all");
+  static final String ADOT_1_27_0 =
+      "https://github.com/aws-observability/aws-otel-java-instrumentation/releases/download/v1.27.0/aws-opentelemetry-agent.jar";
+
+  public static final DistroConfig NONE = new DistroConfig("none", "no agent at all");
   public static final DistroConfig LATEST_RELEASE =
       new DistroConfig("latest", "latest mainstream release", OTEL_LATEST);
   public static final DistroConfig LATEST_SNAPSHOT =
       new DistroConfig("snapshot", "latest available snapshot version from main");
+
+  public static final DistroConfig ADOT_LATEST_RELEASE =
+      new DistroConfig("adot", "latest ADOT release", ADOT_1_27_0);
+
+  static final List<String> pulseDisabled = List.of(
+      "-Dotel.smp.enabled=false",
+      "-Dotel.traces.sampler=traceidratio",
+      "-Dotel.traces.sampler.arg=0.01",
+      "-Dotel.metrics.exporter=none");
+  public static final DistroConfig PULSE_DISABLED =
+      new DistroConfig("pulse-disabled", "Pulse is disabled", null, pulseDisabled);
+
+  static final List<String> pulseEnabledWithoutTrace = List.of(
+      "-Dotel.smp.enabled=true",
+      "-Dotel.traces.sampler=traceidratio",
+      "-Dotel.traces.sampler.arg=0.00",
+      "-Dotel.metrics.exporter=none");
+  public static final DistroConfig PULSE_NO_TRACE =
+      new DistroConfig("pulse-no-trace", "Pulse is enabled with metrics only", null, pulseEnabledWithoutTrace);
+
+  static final List<String> pulseEnabledWithTrace = List.of(
+      "-Dotel.smp.enabled=true",
+      "-Dotel.traces.sampler=traceidratio",
+      "-Dotel.traces.sampler.arg=0.01",
+      "-Dotel.metrics.exporter=none");
+  public static final DistroConfig PULSE =
+      new DistroConfig("pulse", "Pulse is enabled with tracing and metrics", null, pulseEnabledWithTrace);
 
   private final String name;
   private final String description;

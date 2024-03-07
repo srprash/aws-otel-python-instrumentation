@@ -31,7 +31,7 @@ public class ResultsCollector {
   }
 
   public List<AppPerfResults> collect(TestConfig config) {
-    return config.getDistroConfigs().stream()
+    return config.getAgents().stream()
         .map(a -> readDistroConfigResults(a, config))
         .collect(Collectors.toList());
   }

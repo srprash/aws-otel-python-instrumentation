@@ -20,17 +20,23 @@ public class AgentResolver {
 
   private final LatestAgentSnapshotResolver snapshotResolver = new LatestAgentSnapshotResolver();
 
-  public Optional<Path> resolve(DistroConfig distroConfig) throws Exception {
-    if (DistroConfig.NONE.equals(distroConfig)) {
+  public Optional<Path> resolve(DistroConfig agent) throws Exception {
+    if (DistroConfig.NONE.equals(agent)) {
       return Optional.empty();
     }
-    if (DistroConfig.LATEST_SNAPSHOT.equals(distroConfig)) {
+    if (DistroConfig.LATEST_SNAPSHOT.equals(agent)) {
       return snapshotResolver.resolve();
     }
-    if (distroConfig.hasUrl()) {
-      return Optional.of(downloadAgent(distroConfig.getUrl()));
+    if (DistroConfig.PULSE_DISABLED.equals(agent)
+        || DistroConfig.PULSE_NO_TRACE.equals(agent)
+        || DistroConfig.PULSE.equals(agent)) {
+      Path path = Paths.get("./src/test/resources/aws-opentelemetry-agent.jar");
+      return Optional.of(path);
     }
-    throw new IllegalArgumentException("Unknown distroConfig: " + distroConfig);
+    if (agent.hasUrl()) {
+      return Optional.of(downloadAgent(agent.getUrl()));
+    }
+    throw new IllegalArgumentException("Unknown agent: " + agent);
   }
 
   private Path downloadAgent(URL agentUrl) throws Exception {

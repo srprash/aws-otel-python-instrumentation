@@ -63,7 +63,7 @@ public class OverheadTests {
   void runTestConfig(TestConfig config) {
     runDurations.clear();
     config
-        .getDistroConfigs()
+        .getAgents()
         .forEach(
             distroConfig -> {
               try {

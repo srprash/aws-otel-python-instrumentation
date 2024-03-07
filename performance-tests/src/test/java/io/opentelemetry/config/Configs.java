@@ -1,12 +1,12 @@
 /*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
- * Modifications Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  */
 
 package io.opentelemetry.config;
 
 import io.opentelemetry.distros.DistroConfig;
+import io.opentelemetry.util.RuntimeUtil;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -15,24 +15,12 @@ public enum Configs {
   JAVA_100_TPS(
       TestConfig.builder()
           .name("java-100-tps")
-          .description("Compares all DistroConfigs (100TPS test)")
-          .withDistroConfigs(
-              DistroConfig.NONE, DistroConfig.LATEST_RELEASE, DistroConfig.LATEST_SNAPSHOT)
-          .warmupSeconds(10)
+          .description("Compares no agent, Pulse disabled, Pulse (metrics), Pulse (metrics and traces) at 100 TPS")
+          .withAgents(DistroConfig.NONE, DistroConfig.PULSE_DISABLED, DistroConfig.PULSE_NO_TRACE, DistroConfig.PULSE)
+          .warmupSeconds(60)
           .maxRequestRate(100)
-          .duration(System.getenv("DURATION"))
-          .concurrentConnections(System.getenv("CONCURRENCY"))
-          .build()),
-  JAVA_500_TPS(
-      TestConfig.builder()
-          .name("java-500-tps")
-          .description("Compares all DistroConfigs (500TPS test)")
-          .withDistroConfigs(
-              DistroConfig.NONE, DistroConfig.LATEST_RELEASE, DistroConfig.LATEST_SNAPSHOT)
-          .warmupSeconds(10)
-          .maxRequestRate(500)
-          .duration(System.getenv("DURATION"))
-          .concurrentConnections(System.getenv("CONCURRENCY"))
+          .totalIterations(50000) // 500 for 01:33, set large enough to 50000 for 1 hour.
+          .duration(RuntimeUtil.getDuration()) // set "60m" for 1 hour
           .build());
 
   public final TestConfig config;
@@ -45,3 +33,4 @@ public enum Configs {
     this.config = config;
   }
 }
+
