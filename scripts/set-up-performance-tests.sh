@@ -37,6 +37,12 @@ if [ $? = 1 ]; then
   exit 1
 fi
 
+docker build . -t performance-test/vehicle-inventory-service-otel -f performance-tests/Dockerfile-VehicleInventoryService-Otel
+if [ $? = 1 ]; then
+  echo "Docker build for VehicleInventoryService-Otel failed"
+  exit 1
+fi
+
 docker build . -t performance-test/image-service -f performance-tests/Dockerfile-ImageService-base
 if [ $? = 1 ]; then
   echo "Docker build for ImageService failed"
