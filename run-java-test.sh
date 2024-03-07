@@ -15,13 +15,14 @@ echo "Copy and prepare files from S3"
 aws s3api get-object --bucket pulse-sdk-perf-test --key aws-otel-python-instrumentation.zip ~/aws-otel-python-instrumentation.zip
 cd ~
 unzip -q ~/aws-otel-python-instrumentation.zip
-cd ~/aws-otel-python-instrumentation.zip/performance-tests
+cd ~/aws-otel-python-instrumentation/performance-tests
 
 echo "Run test"
 DATE=$(date '+%Y-%m-%d')
 export DURATION=10m
 echo $DURATION
-./gradlew clean test > results/test_run_logs.out
+mkdir -p results
+./gradlew -i clean test > results/test_run_logs.out
 
 echo "Copy files to S3"
 INSTANCE_TYPE="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-type`"
