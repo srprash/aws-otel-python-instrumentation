@@ -4,7 +4,7 @@
   "ImageId": "ami-07761f3ae34c4478d",
   "InstanceType": "r5.2xlarge",
   "EbsOptimized": true,
-  "UserData": "IyEvYmluL2Jhc2gKY2QgL2hvbWUvZWMyLXVzZXIKYXdzIHMzYXBpIGdldC1vYmplY3QgLS1idWNrZXQgcHVsc2Utc2RrLXBlcmYtdGVzdCAtLWtleSBydW4tdGVzdC5zaCAuL3J1bi10ZXN0LnNoCmNobW9kICt4IHJ1bi10ZXN0LnNoCi4vcnVuLXRlc3Quc2ggcHVsc2Utc2RrLXBlcmYtdGVzdCAxbSAxMDAK",
+  "UserData": "IyEvYmluL2Jhc2gKY2QgL2hvbWUvZWMyLXVzZXIKYXdzIHMzYXBpIGdldC1vYmplY3QgLS1idWNrZXQgcHVsc2Utc2RrLXBlcmYtdGVzdCAtLWtleSBydW4tdGVzdC5zaCAuL3J1bi10ZXN0LnNoCmNobW9kICt4IHJ1bi10ZXN0LnNoCi4vcnVuLXRlc3Quc2ggcHVsc2Utc2RrLXBlcmYtdGVzdCAxMG0gMTAwCg==",
   "NetworkInterfaces": [
     {
       "AssociatePublicIpAddress": true,
@@ -20,7 +20,7 @@
       "Tags": [
         {
           "Key": "Name",
-          "Value": "pulse-sdk-perf-test-800"
+          "Value": "pulse-sdk-perf-python-100"
         }
       ]
     }
