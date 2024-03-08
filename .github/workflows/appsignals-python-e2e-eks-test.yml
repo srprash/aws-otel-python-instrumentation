@@ -14,9 +14,6 @@ on:
       test-cluster-name:
         required: true
         type: string
-      test-cluster-is-canary:
-        required: true
-        type: boolean
       appsignals-adot-image:
         required: false
         type: string
@@ -64,10 +61,12 @@ jobs:
           secret-ids:
             ACCOUNT_ID, region-account/${{ inputs.aws-region }}
 
+      # PYTHON_E2E_TEST_ROLE_ARN is used to access main build e2e test cluster
+      # E2E_TEST_ROLE_ARN is used to access canary e2e test cluster
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ inputs['test-cluster-is-canary'] && secrets.E2E_TEST_ROLE_ARN || secrets.PYTHON_E2E_TEST_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ inputs['caller-workflow-name'] == 'main-build' && secrets.PYTHON_E2E_TEST_ROLE_ARN || secrets.E2E_TEST_ROLE_ARN }}
           aws-region: ${{ inputs.aws-region }}
 
       # local directory to store the kubernetes config
