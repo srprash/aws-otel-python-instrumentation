@@ -92,17 +92,17 @@ jobs:
 #          pip install pytest
 #          pytest contract-tests/tests
 #
-#  # AppSignals specific e2e eks tests
-#  appsignals-e2e-eks-test:
-#    needs: [build]
-#    uses: ./.github/workflows/appsignals-python-e2e-eks-test.yml
-#    secrets: inherit
-#    with:
-#      aws-region: ${{ needs.build.outputs.aws_default_region }}
-#      test-cluster-name: e2e-python-adot-test
-#      caller-workflow-name: 'main-build'
-#      appsignals-adot-image: ${{ needs.build.outputs.staging_registry }}/aws-observability/adot-autoinstrumentation-python-staging
-#      appsignals-adot-image-tag: ${{ needs.build.outputs.python_image_tag }}
+  # AppSignals specific e2e eks tests
+  appsignals-e2e-eks-test:
+    needs: [build]
+    uses: ./.github/workflows/appsignals-python-e2e-eks-test.yml
+    secrets: inherit
+    with:
+      aws-region: ${{ needs.build.outputs.aws_default_region }}
+      test-cluster-name: e2e-python-adot-test
+      caller-workflow-name: 'main-build'
+      appsignals-adot-image: ${{ needs.build.outputs.staging_registry }}/aws-observability/adot-autoinstrumentation-python-staging
+      appsignals-adot-image-tag: ${{ needs.build.outputs.python_image_tag }}
 #
 #  # AppSignals specific e2e tests for ec2
 #  appsignals-python-e2e-ec2-test:
