@@ -45,7 +45,8 @@ jobs:
           echo "awsDefaultRegion=${{ env.AWS_DEFAULT_REGION }}" >> $GITHUB_OUTPUT
           echo "python_image_tag=$python_distro_tag" >> $GITHUB_OUTPUT
           echo "stagingRegistry=${{ env.STAGING_ECR_REGISTRY }}" >> $GITHUB_OUTPUT
-          echo "stagingRepository=${{ env.STAGING_ECR_REPOSITORY }}" >> $GITHUB_OUTPUT
+          echo "aws-observability/adot-autoinstrumentation-python-staging: ${{ env.STAGING_ECR_REPOSITORY }}"
+          echo "stagingRepository=aws-observability/adot-autoinstrumentation-python-staging" >> $GITHUB_OUTPUT
           echo "stagingImage=${{ env.STAGING_ECR_REGISTRY }}/aws-observability/adot-autoinstrumentation-python-staging" >> $GITHUB_OUTPUT
 
       - name: Build and Push Wheel and Image Files
