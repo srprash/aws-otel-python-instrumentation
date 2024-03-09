@@ -20,6 +20,7 @@ permissions:
   id-token: write
   contents: read
 
+
 jobs:
   python-e2e-eks-test:
     strategy:
