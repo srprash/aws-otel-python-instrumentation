@@ -47,6 +47,9 @@ jobs:
           echo "stagingRegistry=${{ env.STAGING_ECR_REGISTRY }}" >> $GITHUB_OUTPUT
           echo "aws-observability/test-similar-text: ${{ env.STAGING_ECR_REPOSITORY }}"
           echo "aws-observability/test"
+          echo "stagingRepository=aws-observability/adot"
+          echo "stagingRepository=aws-observability/adot-autoinstrumentation"
+          echo "stagingRepository=aws-observability/adot-autoinstrumentation-python"
           echo "stagingRepository=aws-observability/adot-autoinstrumentation-python-staging" >> $GITHUB_OUTPUT
           echo "stagingImage=${{ env.STAGING_ECR_REGISTRY }}/aws-observability/autoinstrumentation-python-staging" >> $GITHUB_OUTPUT
 
