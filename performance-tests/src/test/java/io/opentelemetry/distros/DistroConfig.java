@@ -21,13 +21,19 @@ public enum DistroConfig {
       "vanilla otel distro without app signals",
       true,
       "performance-test/vehicle-inventory-service-otel" ,
-      Map.of("OTEL_TRACES_EXPORTER", "none")),
+      Map.of("OTEL_TRACES_SAMPLER", "xray", "OTEL_TRACES_SAMPLER_ARG=endpoint", "http://collector:2000")),
   APPLICATION_SIGNALS_DISABLED(
       "app_signals_disabled",
       "ADOT distro with Application Signals disabled",
       true,
       "performance-test/vehicle-inventory-service",
-      Map.of("OTEL_AWS_APP_SIGNALS_ENABLED", "false", "OTEL_TRACES_SAMPLER", "xray")),
+      Map.of(
+          "OTEL_AWS_APP_SIGNALS_ENABLED",
+          "false",
+          "OTEL_TRACES_SAMPLER",
+          "xray",
+          "OTEL_TRACES_SAMPLER_ARG=endpoint",
+          "http://collector:2000")),
   APPLICATION_SIGNALS_NO_TRACES(
       "app_signals_no_traces",
       "ADOT distro with Application Signals enabled and no tracing",
@@ -51,7 +57,9 @@ public enum DistroConfig {
           "OTEL_AWS_SMP_EXPORTER_ENDPOINT",
           "http://collector:4317",
           "OTEL_TRACES_SAMPLER",
-          "xray"));
+          "xray",
+          "OTEL_TRACES_SAMPLER_ARG=endpoint",
+          "http://collector:2000"));
 
   private final String name;
   private final String description;

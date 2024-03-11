@@ -20,6 +20,7 @@ public class CollectorContainer {
 
   static final int COLLECTOR_PORT = 4317;
   static final int COLLECTOR_HEALTH_CHECK_PORT = 13133;
+  static final int COLLECTOR_XRAY_PROXY_PORT = 2000;
 
   private static final Logger logger = LoggerFactory.getLogger(CollectorContainer.class);
 
@@ -30,12 +31,13 @@ public class CollectorContainer {
         .withNetwork(network)
         .withNetworkAliases("collector")
         .withLogConsumer(new Slf4jLogConsumer(logger))
-        .withExposedPorts(COLLECTOR_PORT, COLLECTOR_HEALTH_CHECK_PORT)
+        .withExposedPorts(COLLECTOR_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_XRAY_PROXY_PORT)
         .waitingFor(Wait.forHttp("/health").forPort(COLLECTOR_HEALTH_CHECK_PORT))
         .withCopyFileToContainer(
             MountableFile.forClasspathResource("collector.yaml"), "/etc/otel.yaml")
         .withCreateContainerCmdModifier(
             cmd -> cmd.getHostConfig().withCpusetCpus(RuntimeUtil.getNonApplicationCores()))
-        .withCommand("--config /etc/otel.yaml");
+        .withCommand("--config /etc/otel.yaml")
+        .withEnv("AWS_REGION", "us-east-1");
   }
 }
