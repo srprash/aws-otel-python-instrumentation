@@ -39,7 +39,7 @@ public class DistroConfig {
 
   static final List<String> pulseEnabledWithoutTrace = List.of(
       "-Dotel.smp.enabled=true",
-      "-Dotel.traces.sampler=xray",
+      "-Dotel.traces.sampler=traceidratio",
       "-Dotel.traces.sampler.arg=0.00",
       "-Dotel.metrics.exporter=none");
   public static final DistroConfig PULSE_NO_TRACE =

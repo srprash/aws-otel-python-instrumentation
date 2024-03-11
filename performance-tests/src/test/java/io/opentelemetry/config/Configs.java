@@ -12,13 +12,14 @@ import java.util.stream.Stream;
 
 /** Defines all test configurations */
 public enum Configs {
-  JAVA_100_TPS(
+  JAVA_500_TPS(
       TestConfig.builder()
-          .name("java-100-tps")
-          .description("Compares no agent, Pulse disabled, Pulse (metrics), Pulse (metrics and traces), Pulse (metrics and 100% traces) at 100 TPS")
+          .name("java-500-tps")
+          .description("Compares no agent, Pulse disabled, Pulse (metrics), Pulse (metrics and traces), Pulse "
+              + "(metrics and 100% traces) at 500 TPS")
           .withAgents(DistroConfig.NONE, DistroConfig.PULSE_DISABLED, DistroConfig.PULSE_NO_TRACE, DistroConfig.PULSE, DistroConfig.PULSE_FULL_TRACE)
-          .warmupSeconds(0)
-          .maxRequestRate(100)
+          .warmupSeconds(60)
+          .maxRequestRate(500)
           .totalIterations(50000) // 500 for 01:33, set large enough to 50000 for 1 hour.
           .duration(RuntimeUtil.getDuration()) // set "60m" for 1 hour
           .build());
