@@ -31,15 +31,15 @@ public class DistroConfig {
 
   static final List<String> pulseDisabled = List.of(
       "-Dotel.smp.enabled=false",
-      "-Dotel.traces.sampler=traceidratio",
-      "-Dotel.traces.sampler.arg=0.01",
+      "-Dotel.traces.sampler=xray",
+      "-Dotel.traces.sampler.arg=endpoint=http://collector:2000",
       "-Dotel.metrics.exporter=none");
   public static final DistroConfig PULSE_DISABLED =
       new DistroConfig("pulse-disabled", "Pulse is disabled", null, pulseDisabled);
 
   static final List<String> pulseEnabledWithoutTrace = List.of(
       "-Dotel.smp.enabled=true",
-      "-Dotel.traces.sampler=traceidratio",
+      "-Dotel.traces.sampler=xray",
       "-Dotel.traces.sampler.arg=0.00",
       "-Dotel.metrics.exporter=none");
   public static final DistroConfig PULSE_NO_TRACE =
@@ -47,11 +47,19 @@ public class DistroConfig {
 
   static final List<String> pulseEnabledWithTrace = List.of(
       "-Dotel.smp.enabled=true",
-      "-Dotel.traces.sampler=traceidratio",
-      "-Dotel.traces.sampler.arg=0.01",
+      "-Dotel.traces.sampler=xray",
+      "-Dotel.traces.sampler.arg=endpoint=http://collector:2000",
       "-Dotel.metrics.exporter=none");
   public static final DistroConfig PULSE =
       new DistroConfig("pulse", "Pulse is enabled with tracing and metrics", null, pulseEnabledWithTrace);
+
+  static final List<String> pulseEnabledFullTrace = List.of(
+      "-Dotel.smp.enabled=true",
+      "-Dotel.traces.sampler=traceidratio",
+      "-Dotel.traces.sampler.arg=1.00",
+      "-Dotel.metrics.exporter=none");
+  public static final DistroConfig PULSE_FULL_TRACE =
+      new DistroConfig("pulse-full-trace", "Pulse is enabled with 100% traces and metrics", null, pulseEnabledFullTrace);
 
   private final String name;
   private final String description;

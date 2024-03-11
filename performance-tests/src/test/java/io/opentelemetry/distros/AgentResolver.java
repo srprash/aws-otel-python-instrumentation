@@ -29,6 +29,7 @@ public class AgentResolver {
     }
     if (DistroConfig.PULSE_DISABLED.equals(agent)
         || DistroConfig.PULSE_NO_TRACE.equals(agent)
+        || DistroConfig.PULSE_FULL_TRACE.equals(agent)
         || DistroConfig.PULSE.equals(agent)) {
       Path path = Paths.get("./src/test/resources/aws-opentelemetry-agent.jar");
       return Optional.of(path);
