@@ -34,6 +34,9 @@ public class CollectorContainer {
         .withCopyFileToContainer(
             MountableFile.forClasspathResource("collector.yaml"), "/etc/otel.yaml")
         .withCommand("--config /etc/otel.yaml")
-        .withEnv("AWS_REGION", "us-east-1");
+        .withEnv("AWS_REGION", "us-east-1")
+        .withEnv("AWS_ACCESS_KEY_ID", System.getenv("AWS_ACCESS_KEY_ID"))
+        .withEnv("AWS_SECRET_ACCESS_KEY", System.getenv("AWS_SECRET_ACCESS_KEY"))
+        .withEnv("AWS_SESSION_TOKEN", System.getenv("AWS_SESSION_TOKEN"));
   }
 }
