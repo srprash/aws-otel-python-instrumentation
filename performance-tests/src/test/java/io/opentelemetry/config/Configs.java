@@ -12,13 +12,13 @@ import java.util.stream.Stream;
 
 /** Defines all test configurations */
 public enum Configs {
-  PYTHON_100_TPS(
+  PYTHON_500_TPS(
       TestConfig.builder()
-          .name("python-100-tps")
-          .description("Compares all python DistroConfigs (100TPS test)")
+          .name("python-500-tps")
+          .description("Compares all python DistroConfigs (500TPS test)")
           .withDistroConfigs(DistroConfig.values())
           .warmupSeconds(10)
-          .maxRequestRate(100)
+          .maxRequestRate(500)
           .duration(System.getenv("DURATION"))
           .concurrentConnections(System.getenv("CONCURRENCY"))
           .build());
