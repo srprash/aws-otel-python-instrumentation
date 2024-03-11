@@ -21,7 +21,7 @@ public enum DistroConfig {
       "vanilla otel distro without app signals",
       true,
       "performance-test/vehicle-inventory-service-otel" ,
-      Collections.EMPTY_MAP),
+      Map.of("OTEL_TRACES_EXPORTER", "none")),
   APPLICATION_SIGNALS_DISABLED(
       "app_signals_disabled",
       "ADOT distro with Application Signals disabled",
