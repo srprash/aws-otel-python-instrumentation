@@ -31,8 +31,8 @@ public class DistroConfig {
 
   static final List<String> pulseDisabled = List.of(
       "-Dotel.smp.enabled=false",
-      "-Dotel.traces.sampler=xray",
-      "-Dotel.traces.sampler.arg=endpoint=http://collector:2000",
+      "-Dotel.traces.sampler=traceidratio",
+      "-Dotel.traces.sampler.arg=0.05",
       "-Dotel.metrics.exporter=none");
   public static final DistroConfig PULSE_DISABLED =
       new DistroConfig("pulse-disabled", "Pulse is disabled", null, pulseDisabled);
@@ -47,8 +47,8 @@ public class DistroConfig {
 
   static final List<String> pulseEnabledWithTrace = List.of(
       "-Dotel.smp.enabled=true",
-      "-Dotel.traces.sampler=xray",
-      "-Dotel.traces.sampler.arg=endpoint=http://collector:2000",
+      "-Dotel.traces.sampler=traceidratio",
+      "-Dotel.traces.sampler.arg=0.05",
       "-Dotel.metrics.exporter=none");
   public static final DistroConfig PULSE =
       new DistroConfig("pulse", "Pulse is enabled with tracing and metrics", null, pulseEnabledWithTrace);
