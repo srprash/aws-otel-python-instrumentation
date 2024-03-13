@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - "release/v*"
-      - eks_e2e_python_workflow_test
+      # - eks_e2e_python_workflow_test
 
 env:
   AWS_DEFAULT_REGION: us-east-1

@@ -42,8 +42,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: aws-observability/aws-application-signals-test-framework
-          ref: main
+          repository: jj22ee/aws-application-signals-test-framework
+          ref: remote-target-tests-updated
           fetch-depth: 0
 
       - name: Generate testing id
@@ -334,7 +334,7 @@ jobs:
           --service-name python-application-${{ env.TESTING_ID }}
           --remote-service-name python-remote-application-${{ env.TESTING_ID }}
           --remote-service-deployment-name ${{ env.REMOTE_SERVICE_DEPLOYMENT_NAME }}
-          --request-body ip=${{ env.REMOTE_SERVICE_POD_IP }}
+          --request-body ip=${{ env.REMOTE_SERVICE_POD_IP }}&id=${{ env.TESTING_ID }}
           --rollup'
 
       - name: Call endpoints and validate generated traces
