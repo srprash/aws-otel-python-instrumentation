@@ -73,7 +73,7 @@ jobs:
           echo "Temporary override addon version!!!!!!"
           pwd
           ls
-          sed -i 's/if \[\[ "${result}" == \*"No addon: "\* \]\];/if [[ "$status" != "ACTIVE" ]]/' enable-app-signals.sh
+          sed -i 's/if \[\[ "${result}" == \*"No addon: "\* \]\];/if [[ "$status" != "ACTIVE" ]];/' enable-app-signals.sh
           sed -i 's/    aws eks create-addon/    aws eks delete-addon --cluster-name ${CLUSTER_NAME} --addon-name amazon-cloudwatch-observability --region ${REGION}\n&/' enable-app-signals.sh
           sed -i 's/aws eks create-addon \\/aws eks create-addon \\\n        --resolve-conflicts OVERWRITE \\/' enable-app-signals.sh
           cat enable-app-signals.sh
@@ -194,7 +194,7 @@ jobs:
               ${{ inputs.test-cluster-name }} \
               ${{ inputs.aws-region }} \
               ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}" \
-              "${{ env.TEST_RESOURCES_FOLDER }}/enablement-script/clean-app-signals.sh \
+              "${GITHUB_WORKSPACE}/enablement-script/scripts/eks/appsignals/clean-app-signals.sh \
               ${{ inputs.test-cluster-name }} \
               ${{ inputs.aws-region }} \
               ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }} && \
