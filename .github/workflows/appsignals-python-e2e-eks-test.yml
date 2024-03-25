@@ -178,7 +178,7 @@ jobs:
 
               echo "Installing app signals to the sample app ${GITHUB_WORKSPACE}"
 
-              source ./workflows/util/execute_and_retry.sh
+              source ${GITHUB_WORKSPACE}/.github/workflows/util/execute_and_retry.sh
               execute_and_retry 2 \
               "${GITHUB_WORKSPACE}/enablement-script/scripts/eks/appsignals/enable-app-signals.sh \
               ${{ inputs.test-cluster-name }} \
