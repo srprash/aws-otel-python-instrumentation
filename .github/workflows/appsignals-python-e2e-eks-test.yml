@@ -138,136 +138,136 @@ jobs:
 #        with:
 #          terraform_wrapper: false
 #
-      - name: Deploy sample app via terraform and wait for the endpoint to come online
-        id: deploy-python-app
-        working-directory: terraform/python/eks
-        run: |
-          terraform init
-          terraform validate
-          
-          # Attempt to deploy the sample app on an EKS instance and wait for its endpoint to come online. 
-          # There may be occasional failures due to transitivity issues, so try up to 2 times. 
-          # deployment_failed of 0 indicates that both the terraform deployment and the endpoint are running, while 1 indicates
-          # that it failed at some point
-          retry_counter=0
-          max_retry=2
-          while [ $retry_counter -lt $max_retry ]; do
-            echo "Attempt $retry_counter"
-            deployment_failed=0
-            terraform apply -auto-approve \
-              -var="test_id=${{ env.TESTING_ID }}" \
-              -var="aws_region=${{ inputs.aws-region }}" \
-              -var="kube_directory_path=${{ github.workspace }}/.kube" \
-              -var="eks_cluster_name=${{ inputs.test-cluster-name }}" \
-              -var="eks_cluster_context_name=$(kubectl config current-context)" \
-              -var="test_namespace=${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}" \
-              -var="service_account_aws_access=service-account-${{ env.TESTING_ID }}" \
-              -var="python_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_FE_SA_IMG }}" \
-              -var="python_remote_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_RE_SA_IMG }}" \
-            || deployment_failed=$?
-                    
-            if [ $deployment_failed -eq 1 ]; then
-              echo "Terraform deployment was unsuccessful. Will attempt to retry deployment."
-            fi
-
-            # If the deployment_failed is still 0, then the terraform deployment succeeded and now try to connect to the endpoint 
-            # after installing App Signals. Attempts to connect will be made for up to 10 minutes
-            if [ $deployment_failed -eq 0 ]; then          
+#      - name: Deploy sample app via terraform and wait for the endpoint to come online
+#        id: deploy-python-app
+#        working-directory: terraform/python/eks
+#        run: |
+#          terraform init
+#          terraform validate
 #
-#              kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
+#          # Attempt to deploy the sample app on an EKS instance and wait for its endpoint to come online.
+#          # There may be occasional failures due to transitivity issues, so try up to 2 times.
+#          # deployment_failed of 0 indicates that both the terraform deployment and the endpoint are running, while 1 indicates
+#          # that it failed at some point
+#          retry_counter=0
+#          max_retry=2
+#          while [ $retry_counter -lt $max_retry ]; do
+#            echo "Attempt $retry_counter"
+#            deployment_failed=0
+#            terraform apply -auto-approve \
+#              -var="test_id=${{ env.TESTING_ID }}" \
+#              -var="aws_region=${{ inputs.aws-region }}" \
+#              -var="kube_directory_path=${{ github.workspace }}/.kube" \
+#              -var="eks_cluster_name=${{ inputs.test-cluster-name }}" \
+#              -var="eks_cluster_context_name=$(kubectl config current-context)" \
+#              -var="test_namespace=${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}" \
+#              -var="service_account_aws_access=service-account-${{ env.TESTING_ID }}" \
+#              -var="python_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_FE_SA_IMG }}" \
+#              -var="python_remote_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_RE_SA_IMG }}" \
+#            || deployment_failed=$?
 #
-#              echo "Installing app signals to the sample app"
+#            if [ $deployment_failed -eq 1 ]; then
+#              echo "Terraform deployment was unsuccessful. Will attempt to retry deployment."
+#            fi
 #
-#              source ./workflows/util/execute_and_retry.sh
-#              execute_and_retry 2 \
-#              "${GITHUB_WORKSPACE}/enablement-script/scripts/eks/appsignals/enable-app-signals.sh \
-#              ${{ inputs.test-cluster-name }} \
-#              ${{ inputs.aws-region }} \
-#              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
-#              "${{ env.TEST_RESOURCES_FOLDER }}/enablement-script/clean-app-signals.sh \
-#              ${{ inputs.test-cluster-name }} \
-#              ${{ inputs.aws-region }} \
-#              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }} && \
-#              aws eks update-kubeconfig --name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }}"
+#            # If the deployment_failed is still 0, then the terraform deployment succeeded and now try to connect to the endpoint
+#            # after installing App Signals. Attempts to connect will be made for up to 10 minutes
+#            if [ $deployment_failed -eq 0 ]; then
+##
+##              kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
+##
+##              echo "Installing app signals to the sample app"
+##
+##              source ./workflows/util/execute_and_retry.sh
+##              execute_and_retry 2 \
+##              "${GITHUB_WORKSPACE}/enablement-script/scripts/eks/appsignals/enable-app-signals.sh \
+##              ${{ inputs.test-cluster-name }} \
+##              ${{ inputs.aws-region }} \
+##              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
+##              "${{ env.TEST_RESOURCES_FOLDER }}/enablement-script/clean-app-signals.sh \
+##              ${{ inputs.test-cluster-name }} \
+##              ${{ inputs.aws-region }} \
+##              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }} && \
+##              aws eks update-kubeconfig --name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }}"
+##
+##
+##              execute_and_retry 2 "kubectl delete pods --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
+##              execute_and_retry 2 "kubectl wait --for=condition=Ready --request-timeout '5m' pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
 #
 #
-#              execute_and_retry 2 "kubectl delete pods --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
-#              execute_and_retry 2 "kubectl wait --for=condition=Ready --request-timeout '5m' pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
-          
-
-              # TODO: The next 7 lines are used for custom pre-release instrumentation
-              # It is a temporary measure until the cw add-on is released with python support
+#              # TODO: The next 7 lines are used for custom pre-release instrumentation
+#              # It is a temporary measure until the cw add-on is released with python support
+##              cd ${{ github.workspace }}/amazon-cloudwatch-agent-operator/
+##              kubectl apply -f namespace.yaml
+##              helm template amazon-cloudwatch-observability ./helm --include-crds --namespace amazon-cloudwatch | kubectl apply --namespace amazon-cloudwatch --server-side --force-conflicts -f -
+##
+##              kubectl wait --for=condition=Ready pod --all -n amazon-cloudwatch
+##              kubectl delete pods --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
+##              kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
+##              cd ${{ github.workspace }}/terraform/python/eks
+#
+#              echo "Attempting to connect to the endpoint"
+#              python_app_endpoint=http://$(terraform output python_app_endpoint)
+#              attempt_counter=0
+#              max_attempts=60
+#              until $(curl --output /dev/null --silent --head --fail $(echo "$python_app_endpoint" | tr -d '"')); do
+#                if [ ${attempt_counter} -eq ${max_attempts} ];then
+#                  echo "Failed to connect to endpoint. Will attempt to redeploy sample app."
+#                  deployment_failed=1
+#                  break
+#                fi
+#
+#                printf '.'
+#                attempt_counter=$(($attempt_counter+1))
+#                sleep 10
+#              done
+#            fi
+#
+#            # If the deployment_failed is 1 then either the terraform deployment or the endpoint connection failed, so first destroy the
+#            # resources created from terraform and try again.
+#            if [ $deployment_failed -eq 1 ]; then
+#              echo "Cleaning up App Signal"
+#
 #              cd ${{ github.workspace }}/amazon-cloudwatch-agent-operator/
-#              kubectl apply -f namespace.yaml
-#              helm template amazon-cloudwatch-observability ./helm --include-crds --namespace amazon-cloudwatch | kubectl apply --namespace amazon-cloudwatch --server-side --force-conflicts -f -
+#              kubectl delete -f ./namespace.yaml
 #
-#              kubectl wait --for=condition=Ready pod --all -n amazon-cloudwatch
-#              kubectl delete pods --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
-#              kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
-#              cd ${{ github.workspace }}/terraform/python/eks
-
-              echo "Attempting to connect to the endpoint"
-              python_app_endpoint=http://$(terraform output python_app_endpoint)
-              attempt_counter=0
-              max_attempts=60
-              until $(curl --output /dev/null --silent --head --fail $(echo "$python_app_endpoint" | tr -d '"')); do
-                if [ ${attempt_counter} -eq ${max_attempts} ];then
-                  echo "Failed to connect to endpoint. Will attempt to redeploy sample app."
-                  deployment_failed=1
-                  break
-                fi
-          
-                printf '.'
-                attempt_counter=$(($attempt_counter+1))
-                sleep 10
-              done
-            fi
-          
-            # If the deployment_failed is 1 then either the terraform deployment or the endpoint connection failed, so first destroy the
-            # resources created from terraform and try again.
-            if [ $deployment_failed -eq 1 ]; then
-              echo "Cleaning up App Signal"
-
-              cd ${{ github.workspace }}/amazon-cloudwatch-agent-operator/
-              kubectl delete -f ./namespace.yaml
-
-              echo "Destroying terraform"
-              terraform destroy -auto-approve \
-                -var="test_id=${{ env.TESTING_ID }}" \
-                -var="aws_region=${{ inputs.aws-region }}" \
-                -var="kube_directory_path=${{ github.workspace }}/.kube" \
-                -var="eks_cluster_name=${{ inputs.test-cluster-name }}" \
-                -var="eks_cluster_context_name=$(kubectl config current-context)" \
-                -var="test_namespace=${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}" \
-                -var="service_account_aws_access=service-account-${{ env.TESTING_ID }}" \
-                -var="python_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_FE_SA_IMG }}" \
-                -var="python_remote_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_RE_SA_IMG }}"
-          
-              retry_counter=$(($retry_counter+1))
-            else
-              # If deployment succeeded, then exit the loop
-              break
-            fi
-          
-            if [ $retry_counter -eq $max_retry ]; then
-              echo "Max retry reached, failed to deploy terraform and connect to the endpoint. Exiting code"
-              exit 1
-            fi
-          done
-
-          # Attach policies to cluster node group roles that are required for AppSignals
-          aws eks list-nodegroups --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} |\
-          jq -r '.nodegroups[]' |\
-          while read -r node_group;
-          do
-            node_role=$(\
-              aws eks describe-nodegroup  --cluster-name ${{ inputs.test-cluster-name }} --nodegroup-name $node_group --region ${{ inputs.aws-region }} |\
-              jq -r '.nodegroup.nodeRole' |\
-              cut -d'/' -f2
-            )
-            aws iam attach-role-policy --role-name $node_role --policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy --region ${{ inputs.aws-region }}
-            aws iam attach-role-policy --role-name $node_role --policy-arn arn:aws:iam::aws:policy/AWSXRayWriteOnlyAccess --region ${{ inputs.aws-region }}
-          done
+#              echo "Destroying terraform"
+#              terraform destroy -auto-approve \
+#                -var="test_id=${{ env.TESTING_ID }}" \
+#                -var="aws_region=${{ inputs.aws-region }}" \
+#                -var="kube_directory_path=${{ github.workspace }}/.kube" \
+#                -var="eks_cluster_name=${{ inputs.test-cluster-name }}" \
+#                -var="eks_cluster_context_name=$(kubectl config current-context)" \
+#                -var="test_namespace=${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}" \
+#                -var="service_account_aws_access=service-account-${{ env.TESTING_ID }}" \
+#                -var="python_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_FE_SA_IMG }}" \
+#                -var="python_remote_app_image=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ secrets.APP_SIGNALS_PYTHON_E2E_RE_SA_IMG }}"
+#
+#              retry_counter=$(($retry_counter+1))
+#            else
+#              # If deployment succeeded, then exit the loop
+#              break
+#            fi
+#
+#            if [ $retry_counter -eq $max_retry ]; then
+#              echo "Max retry reached, failed to deploy terraform and connect to the endpoint. Exiting code"
+#              exit 1
+#            fi
+#          done
+#
+#          # Attach policies to cluster node group roles that are required for AppSignals
+#          aws eks list-nodegroups --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} |\
+#          jq -r '.nodegroups[]' |\
+#          while read -r node_group;
+#          do
+#            node_role=$(\
+#              aws eks describe-nodegroup  --cluster-name ${{ inputs.test-cluster-name }} --nodegroup-name $node_group --region ${{ inputs.aws-region }} |\
+#              jq -r '.nodegroup.nodeRole' |\
+#              cut -d'/' -f2
+#            )
+#            aws iam attach-role-policy --role-name $node_role --policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy --region ${{ inputs.aws-region }}
+#            aws iam attach-role-policy --role-name $node_role --policy-arn arn:aws:iam::aws:policy/AWSXRayWriteOnlyAccess --region ${{ inputs.aws-region }}
+#          done
 
       - name: Get remote service pod name and IP
         run: |
