@@ -67,17 +67,17 @@ jobs:
           sparse-checkout-cone-mode: false
 
       # TODO: remove this step next Monday and update validator with appropriate changes
-#      - name: Temporary override addon version
-#        working-directory: enablement-script
-#        run: |
-#          sed -i '\#--addon-name amazon-cloudwatch-observability \\#a--addon-version v1.2.2-eksbuild.1 \\' enable-app-signals.sh
-#
-#      - name: Remove log group deletion command
-#        if: always()
-#        working-directory: enablement-script
-#        run: |
-#          delete_log_group="aws logs delete-log-group --log-group-name '${{ env.LOG_GROUP_NAME }}' --region \$REGION"
-#          sed -i "s#$delete_log_group##g" clean-app-signals.sh
+      - name: Temporary override addon version
+        working-directory: enablement-script
+        run: |
+          sed -i '\#--addon-name amazon-cloudwatch-observability \\#a--addon-version v1.2.2-eksbuild.1 \\' enable-app-signals.sh
+
+      - name: Remove log group deletion command
+        if: always()
+        working-directory: enablement-script
+        run: |
+          delete_log_group="aws logs delete-log-group --log-group-name '${{ env.LOG_GROUP_NAME }}' --region \$REGION"
+          sed -i "s#$delete_log_group##g" clean-app-signals.sh
 
       - name: Generate testing id
         run: echo TESTING_ID="${{ inputs.aws-region }}-${{ github.run_id }}-${{ github.run_number }}-t" >> $GITHUB_ENV
