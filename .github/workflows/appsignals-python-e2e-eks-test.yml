@@ -73,7 +73,7 @@ jobs:
           echo "Temporary override addon version!!!!!!"
           pwd
           ls
-          sed -i 's/if \[\[ "${result}" == \*"No addon: "\* \]\];/if [[ "${result}" == *"No addon: "* ]] || "$status" == "CREATE_FAILED";/' enable-app-signals.sh
+          sed -i 's/if \[\[ "${result}" == \*"No addon: "\* \]\];/if [[ "${result}" == *"No addon: "* ]] || [[ "$status" == "CREATE_FAILED" ]];/' enable-app-signals.sh
           sed -i 's/aws eks create-addon \\/aws eks create-addon \\\n        --resolve-conflicts OVERWRITE \\/' enable-app-signals.sh
           cat enable-app-signals.sh
 #          sed -i '\#--addon-name amazon-cloudwatch-observability \\#a--addon-version v1.2.2-eksbuild.1 \\' enable-app-signals.sh
