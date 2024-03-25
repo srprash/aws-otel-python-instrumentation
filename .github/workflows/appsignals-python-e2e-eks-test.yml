@@ -68,16 +68,22 @@ jobs:
 
       # TODO: remove this step next Monday and update validator with appropriate changes
       - name: Temporary override addon version
-        working-directory: enablement-script
+        working-directory: enablement-script/scripts/eks/appsignals
         run: |
-          sed -i '\#--addon-name amazon-cloudwatch-observability \\#a--addon-version v1.2.2-eksbuild.1 \\' enable-app-signals.sh
+          echo "Temporary override addon version!!!!!!"
+          pwd
+          ls
+          sed -i 's/if \[\[ "${result}" == \*"No addon: "\]\];/if [[ "${result}" == *"No addon: "* ]] || "$status" == "CREATE_FAILED";/' enable-app-signals.sh
+          sed -i 's/aws eks create-addon \\/aws eks create-addon \\\n        --resolve-conflicts OVERWRITE \\/' enable-app-signals.sh
+          cat enable-app-signals.sh
+#          sed -i '\#--addon-name amazon-cloudwatch-observability \\#a--addon-version v1.2.2-eksbuild.1 \\' enable-app-signals.sh
 
-      - name: Remove log group deletion command
-        if: always()
-        working-directory: enablement-script
-        run: |
-          delete_log_group="aws logs delete-log-group --log-group-name '${{ env.LOG_GROUP_NAME }}' --region \$REGION"
-          sed -i "s#$delete_log_group##g" clean-app-signals.sh
+#      - name: Remove log group deletion command
+#        if: always()
+#        working-directory: enablement-script
+#        run: |
+#          delete_log_group="aws logs delete-log-group --log-group-name '${{ env.LOG_GROUP_NAME }}' --region \$REGION"
+#          sed -i "s#$delete_log_group##g" clean-app-signals.sh
 
       - name: Generate testing id
         run: echo TESTING_ID="${{ inputs.aws-region }}-${{ github.run_id }}-${{ github.run_number }}-t" >> $GITHUB_ENV
