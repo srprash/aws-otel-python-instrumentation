@@ -9,7 +9,7 @@ name: App Signals Enablement - Python E2E EKS Canary Testing
 on:
 #  schedule:
 #    - cron: '*/15 * * * *' # run the workflow every 15 minutes
-#  workflow_dispatch: # be able to run the workflow on demand
+  workflow_dispatch: # be able to run the workflow on demand
 
 concurrency:
   group: ${{ github.workflow }}
