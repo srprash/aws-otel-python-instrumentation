@@ -132,12 +132,12 @@ jobs:
           --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess \
           --region ${{ inputs.aws-region }} \
           --approve
-#
+
 #      - name: Set up terraform
 #        uses: hashicorp/setup-terraform@v3
 #        with:
 #          terraform_wrapper: false
-
+#
       - name: Deploy sample app via terraform and wait for the endpoint to come online
         id: deploy-python-app
         working-directory: terraform/python/eks
