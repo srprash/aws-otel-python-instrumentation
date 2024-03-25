@@ -115,6 +115,8 @@ jobs:
       - name: Install eksctl
         working-directory: .github/
         run: |
+          echo "PWD!!!!!"
+          pwd
           source ./workflows/util/execute_and_retry.sh
           mkdir ${{ github.workspace }}/eksctl
           curl -sLO "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz"
