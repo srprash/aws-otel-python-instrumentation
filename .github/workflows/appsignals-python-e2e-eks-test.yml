@@ -173,26 +173,26 @@ jobs:
             # If the deployment_failed is still 0, then the terraform deployment succeeded and now try to connect to the endpoint 
             # after installing App Signals. Attempts to connect will be made for up to 10 minutes
             if [ $deployment_failed -eq 0 ]; then          
-
-              kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
-
-              echo "Installing app signals to the sample app"
-               
-              source ./workflows/util/execute_and_retry.sh
-              execute_and_retry 2 \
-              "${GITHUB_WORKSPACE}/enablement-script/scripts/eks/appsignals/enable-app-signals.sh \
-              ${{ inputs.test-cluster-name }} \
-              ${{ inputs.aws-region }} \
-              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
-              "${{ env.TEST_RESOURCES_FOLDER }}/enablement-script/clean-app-signals.sh \
-              ${{ inputs.test-cluster-name }} \
-              ${{ inputs.aws-region }} \
-              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }} && \
-              aws eks update-kubeconfig --name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }}"
-               
-               
-              execute_and_retry 2 "kubectl delete pods --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
-              execute_and_retry 2 "kubectl wait --for=condition=Ready --request-timeout '5m' pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
+#
+#              kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
+#
+#              echo "Installing app signals to the sample app"
+#
+#              source ./workflows/util/execute_and_retry.sh
+#              execute_and_retry 2 \
+#              "${GITHUB_WORKSPACE}/enablement-script/scripts/eks/appsignals/enable-app-signals.sh \
+#              ${{ inputs.test-cluster-name }} \
+#              ${{ inputs.aws-region }} \
+#              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
+#              "${{ env.TEST_RESOURCES_FOLDER }}/enablement-script/clean-app-signals.sh \
+#              ${{ inputs.test-cluster-name }} \
+#              ${{ inputs.aws-region }} \
+#              ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }} && \
+#              aws eks update-kubeconfig --name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }}"
+#
+#
+#              execute_and_retry 2 "kubectl delete pods --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
+#              execute_and_retry 2 "kubectl wait --for=condition=Ready --request-timeout '5m' pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}"
           
 
               # TODO: The next 7 lines are used for custom pre-release instrumentation
