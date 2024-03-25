@@ -177,7 +177,8 @@ jobs:
               kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
 
               echo "Installing app signals to the sample app ${GITHUB_WORKSPACE}"
-
+              ls -R ${GITHUB_WORKSPACE}/.github/workflows
+          
               source ${GITHUB_WORKSPACE}/.github/workflows/util/execute_and_retry.sh
               execute_and_retry 2 \
               "${GITHUB_WORKSPACE}/enablement-script/scripts/eks/appsignals/enable-app-signals.sh \
