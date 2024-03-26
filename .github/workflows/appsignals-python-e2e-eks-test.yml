@@ -73,6 +73,22 @@ jobs:
           echo "Temporary override addon version!!!!!!"
           pwd
           ls
+          sed -i '/echo "Checking amazon-cloudwatch-observability add-on"/i \
+          counter=0\n\
+          max_try=2\n\
+          while [ $counter -lt $max_try ]; do\n\
+            result=$(aws eks describe-addon --addon-name amazon-cloudwatch-observability --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} 2>&1)\n\
+            if [[ $result =~ "No addon" ]]; then\n\
+              echo "No addon found, continuing..."\n\
+              break\n\
+            elif [[ -n $result ]]; then\n\
+              echo "Error occurred: $result"\n\
+            else\n\
+              echo "Addon found, waiting for deletion...$result"\n\
+              sleep 20\n\
+            fi\n\
+            counter=$(($counter+1))\n\
+          done' enable-app-signals.sh
           sed -i 's/aws eks create-addon \\/aws eks create-addon \\\n        --resolve-conflicts OVERWRITE \\\n        --addon-version v1.2.2-eksbuild.1 \\/' enable-app-signals.sh
           cat enable-app-signals.sh
 #          sed -i 's/if \[\[ "${result}" == \*"No addon: "\* \]\];/if [[ "$status" != "ACTIVE" ]];/' enable-app-signals.sh
@@ -183,22 +199,6 @@ jobs:
             # after installing App Signals. Attempts to connect will be made for up to 10 minutes
             if [ $deployment_failed -eq 0 ]; then          
               kubectl wait --for=condition=Ready pod --all -n ${{ env.PYTHON_SAMPLE_APP_NAMESPACE }}
-          
-              counter=0
-              max_try=2
-              while [ $counter -lt $max_try ]; do
-                result=$(aws eks describe-addon --addon-name amazon-cloudwatch-observability --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} 2>&1)
-                if [[ $result =~ "No addon" ]]; then
-                  echo "No addon found, continuing..."
-                  break
-                elif [[ -n $result ]]; then
-                  echo "Error occurred: $result"
-                else
-                  echo "Addon found, waiting for deletion...$result"
-                  sleep 20
-                fi
-                counter=$(($counter+1))
-              done
           
               source ${GITHUB_WORKSPACE}/.github/workflows/util/execute_and_retry.sh
               execute_and_retry 2 \
