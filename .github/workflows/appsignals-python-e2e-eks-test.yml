@@ -66,18 +66,6 @@ jobs:
             scripts/eks/appsignals/clean-app-signals.sh
           sparse-checkout-cone-mode: false
 
-      - name: Delete addon and monitor status
-        run: |
-          aws eks delete-addon --cluster-name ${{ inputs.test-cluster-name }} --addon-name amazon-cloudwatch-observability --region ${{ inputs.aws-region }}
-          result=$(aws eks describe-addon --addon-name amazon-cloudwatch-observability --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} 2>&1)
-          retry_counter=0
-          max_retry=2
-          while [[ "${result}" != *"No addon: "* ]] && [ $retry_counter -lt $max_retry ]; do
-            echo "Current status: ${result}"
-            sleep 5  # Wait for 5 seconds before checking again
-            result=$(aws eks describe-addon --addon-name amazon-cloudwatch-observability --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} 2>&1)
-          done
-
       # TODO: remove this step next Monday and update validator with appropriate changes
       - name: Temporary override addon version
         working-directory: enablement-script/scripts/eks/appsignals
@@ -199,6 +187,13 @@ jobs:
 
               echo "Installing app signals to the sample app ${GITHUB_WORKSPACE}"
               ls -R ${GITHUB_WORKSPACE}/.github/workflows
+          
+              aws eks delete-addon --cluster-name ${{ inputs.test-cluster-name }} --addon-name amazon-cloudwatch-observability --region ${{ inputs.aws-region }}
+              result=$(aws eks describe-addon --addon-name amazon-cloudwatch-observability --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} 2>&1)
+              echo "Current status before: ${result}"
+              sleep 20  # Wait for 5 seconds before checking again
+              result=$(aws eks describe-addon --addon-name amazon-cloudwatch-observability --cluster-name ${{ inputs.test-cluster-name }} --region ${{ inputs.aws-region }} 2>&1)
+              echo "Current status before: ${result}"
           
               source ${GITHUB_WORKSPACE}/.github/workflows/util/execute_and_retry.sh
               execute_and_retry 2 \
